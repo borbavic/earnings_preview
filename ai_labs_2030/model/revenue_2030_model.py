@@ -133,6 +133,21 @@ ASSUMPTIONS: List[A] = [
       "OpenAI 2026: ~15-20 quadrillion tok/yr on ~1.5-2GW inference => ~10 at actual util; Google 38 quadrillion/yr (3.2q/mo, May-26); GB200 frontier config 75-85q/GW (vendor claim), Rubin 2-4x GB300", "Supply"),
     A("price_tok", "Realised blended price ($/M tokens, 2030)", 1.2, 1.6, 2.6, "$/M",
       "2026 realised: OpenAI ~$2-2.5/M (subs incl.), Anthropic ~$5/M (API-heavy); list Opus $4/$20, GPT $2/$10; ~10x/yr deflation per unit capability offset by mix", "Supply"),
+    # ---- Deck as presented (revenue per GW of INFERENCE capacity) ----
+    A("deck_gw", "Deck: total GW per company (2030)", 25, 25, 25, "GW",
+      "deck assumption; OpenAI targets 30GW by 2030, Anthropic ~10GW in 2027", "Deck"),
+    A("deck_inf_share", "Deck: share of capacity allocated to inference", 0.50, 0.525, 0.55, "%",
+      "deck assumption: 50-55% inference, rest training/research", "Deck"),
+    A("deck_rgw_inf", "Deck: revenue per GW of inference ($B/yr)", 28, 30, 32, "$B",
+      "deck assumption ($30B); realised today: OpenAI 2025 ~$20B, Anthropic 2026E ~$34B (see below)", "Deck"),
+    A("oai_gw_2025", "OpenAI GW available end-2025 (realised anchor)", 1.9, 1.9, 1.9, "GW",
+      "OpenAI: 0.2GW (2023) -> 1.9GW (2025)", "Deck"),
+    A("oai_rr_2025", "OpenAI run-rate end-2025 ($B, realised anchor)", 20, 20, 20, "$B",
+      ">$20B ARR (Nov-25)", "Deck"),
+    A("ant_gw_2026", "Anthropic GW available end-2026 (realised anchor)", 5, 5, 5, "GW",
+      "~5GW end-2026 (press)", "Deck"),
+    A("inf_share_today", "Inference share of capacity today (for realised $/GW-inference)", 0.50, 0.525, 0.55, "%",
+      "same 50-55% assumption applied to 2025-26 fleets", "Deck"),
     # ---- Momentum path (run-rate, $B) ----
     A("oai_rr26", "OpenAI exit-2026 run-rate ($B)", 46, 50, 55, "$B",
       ">$40B run-rate Aug-26 (+35% QTD)", "Momentum"),
@@ -212,6 +227,28 @@ def company(co: str, s: str) -> Dict[str, float]:
     return r
 
 
+def rev_per_gw_inf(s: str) -> float:
+    """$B revenue per GW of INFERENCE capacity: tokens/GW (1e15) x $/M x utilisation."""
+    return g("tok_per_gw", s) * g("price_tok", s) * g("util", s)
+
+
+def deck_check(s: str) -> Dict[str, float]:
+    """The deck's arithmetic: total GW x inference share x $/GW-inference, and how it compares."""
+    rev = g("deck_gw", s) * g("deck_inf_share", s) * g("deck_rgw_inf", s)
+    oai_real = g("oai_rr_2025", s) / (g("oai_gw_2025", s) * g("inf_share_today", s))
+    ant_real = g("ant_rr26", s) / (g("ant_gw_2026", s) * g("inf_share_today", s))
+    return {
+        "Deck revenue = GW x inf share x $/GW-inf ($B)": rev,
+        "Deck implied $/GW of TOTAL capacity ($B)": g("deck_inf_share", s) * g("deck_rgw_inf", s),
+        "Model $/GW-inference 2030 ($B)": rev_per_gw_inf(s),
+        "Deck $/GW-inf vs model": g("deck_rgw_inf", s) / rev_per_gw_inf(s),
+        "Realised OpenAI 2025 $/GW-inf ($B)": oai_real,
+        "Realised Anthropic 2026E $/GW-inf ($B)": ant_real,
+        "Deck $/GW-inf vs OpenAI 2025": g("deck_rgw_inf", s) / oai_real,
+        "Deck $/GW-inf vs Anthropic 2026E": g("deck_rgw_inf", s) / ant_real,
+    }
+
+
 def rev_per_gw_total(s: str) -> float:
     """$B revenue per GW of TOTAL capacity: 1e15 tokens * $/1e6 = $1e9."""
     return g("tok_per_gw", s) * g("price_tok", s) * g("util", s) * g("inf_share", s)
@@ -230,6 +267,7 @@ def supply(co: str, s: str) -> Dict[str, float]:
         "Demand-side revenue ($B)": demand,
         "GW needed for demand at this $/GW": demand / per_gw,
         "$/GW needed for demand at this GW": demand / gw,
+        "$/GW-inference needed at this GW and inf share": demand / (gw * g("inf_share", s)),
     }
 
 
@@ -266,8 +304,9 @@ def what_you_need(co: str, target: float, s: str = "base") -> Dict[str, str]:
     gw = g(f"{co}_gw", s)
     out = {}
     out["Implied $/GW total at base GW"] = f"${target/gw:.1f}B/GW ({gw:.0f} GW)"
-    out["Implied GW at $35B/GW"] = f"{target/35:.1f} GW"
-    out["Implied GW at base $/GW"] = f"{target/rev_per_gw_total(s):.1f} GW (${rev_per_gw_total(s):.1f}B/GW)"
+    out["Implied $/GW-inference at base GW and base inference share"] = f"${target/(gw*g('inf_share', s)):.1f}B per inference GW ({gw:.0f} GW x {g('inf_share', s):.0%})"
+    out["Implied GW at deck economics"] = f"{target/(g('deck_rgw_inf', s)*g('deck_inf_share', s)):.1f} GW (${g('deck_rgw_inf', s):.0f}B/GW-inf x {g('deck_inf_share', s):.1%})"
+    out["Implied GW at base $/GW"] = f"{target/rev_per_gw_total(s):.1f} GW (${rev_per_gw_total(s):.1f}B/GW total)"
     out["Required uplift on enterprise engines vs base"] = f"{uplift:.2f}x"
     # single-driver equivalents (each alone, others at base)
     dev_ratio = g("ratio_dev", s) * (1 + (uplift - 1) * ent / r["Developers / coding agents"])
@@ -311,12 +350,17 @@ def grid(row_vals, col_vals, f, row_fmt, col_fmt, cell_fmt, corner="") -> str:
 def sensitivities() -> Dict[str, str]:
     s = "base"
     out = {}
-    out["Revenue = GW x $/GW ($B)"] = grid(
-        [10, 15, 20, 25, 30], [8, 10.5, 14, 20, 28, 35], lambda gw, pg: gw * pg,
-        lambda r: f"{r} GW", lambda c: f"${c}B/GW", lambda v: f"{v:,.0f}")
-    k = g("inf_share", s) * g("util", s)
-    out[f"$/GW total = tokens/GW x price x (inf share {g('inf_share', s):.0%} x util {g('util', s):.0%})"] = grid(
-        [12, 16, 20, 24, 32], [0.8, 1.2, 1.6, 2.2, 3.0], lambda t, p: t * p * k,
+    dsh = g("deck_inf_share", s)
+    out[f"Revenue ($B) = total GW x inference share ({dsh:.1%}) x $/GW-inference"] = grid(
+        [10, 15, 20, 25, 30], [15, 20, 25, 30, 35, 40], lambda gw, pg: gw * dsh * pg,
+        lambda r: f"{r} GW", lambda c: f"${c}B/GW-inf", lambda v: f"{v:,.0f}")
+    dgw = g("deck_gw", s)
+    out[f"Revenue ($B) at {dgw:.0f} GW = inference share x $/GW-inference"] = grid(
+        [0.45, 0.50, 0.55, 0.60, 0.65], [15, 20, 25, 30, 35, 40], lambda sh, pg: dgw * sh * pg,
+        lambda r: f"{r:.0%} inference", lambda c: f"${c}B/GW-inf", lambda v: f"{v:,.0f}")
+    ku = g("util", s)
+    out[f"$/GW-inference = tokens/GW-yr x realised price x utilisation ({ku:.0%})"] = grid(
+        [12, 16, 20, 24, 28, 32], [0.8, 1.2, 1.6, 2.0, 2.4, 3.0], lambda t, p: t * p * ku,
         lambda r: f"{r}q tok/GW", lambda c: f"${c}/M", lambda v: f"{v:,.1f}")
     out["OpenAI ads revenue ($B) = free MAU x ad ARPU"] = grid(
         [1400, 1900, 2300], [15, 30, 45, 60, 80], lambda m, a: m * a / 1000,
@@ -349,6 +393,9 @@ def report() -> str:
     rows.append(["Machine / agent API"] + [fmt(machine_pool(s)) for s in SCEN])
     rows.append(["TOTAL enterprise pool"] + [fmt(enterprise_pool(s)) for s in SCEN])
     parts.append("## Global enterprise AI spend pools 2030 ($B, all vendors)\n" + md_table(["Pool", "Bear", "Base", "Bull"], rows))
+    dc = {s: deck_check(s) for s in SCEN}
+    parts.append("## Deck check: revenue = total GW x inference share x $/GW-inference\n" + md_table(
+        ["Metric", "Bear", "Base", "Bull"], [[k] + [fmt(dc[s][k]) for s in SCEN] for k in dc["base"].keys()]))
     for co, name in [("oai", "OpenAI"), ("ant", "Anthropic")]:
         res = {s: company(co, s) for s in SCEN}
         rows = [[seg] + [fmt(res[s][seg]) for s in SCEN] for seg in SEGMENTS + ["TOTAL"]]

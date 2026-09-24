@@ -2,7 +2,7 @@
 Builds AI_labs_revenue_2030_bottomup.xlsx with live formulas from the assumptions in
 revenue_2030_model.py. Run, then recalculate with LibreOffice (see verify_xlsx.py).
 
-Sheets: Summary | Inputs | OpenAI | Anthropic | Sensitivity | Sources
+Sheets: Summary | Inputs | OpenAI | Anthropic | Deck_check | Sensitivity | Sources
 Convention: blue = hardcoded input, black = formula, green = link to another sheet,
 yellow fill = cells the user is meant to edit (Custom scenario column).
 """
@@ -189,6 +189,7 @@ def build_company(wb: Workbook, co: str, name: str) -> Dict[str, int]:
     line("dem_sup", "Demand / supply capacity", "x", lambda c: f"=IF({c}{R['sup_cap']}=0,0,{c}{R['dem']}/{c}{R['sup_cap']})", "0.00x", ">1.0x = compute-constrained")
     line("gw_need", "GW needed for demand at this $/GW", "GW", lambda c: f"=IF({c}{R['rgw']}=0,0,{c}{R['dem']}/{c}{R['rgw']})", "0.0", "")
     line("rgw_need", "$/GW needed for demand at this GW", "$B/GW", lambda c: f"=IF({c}{R['gw']}=0,0,{c}{R['dem']}/{c}{R['gw']})", B, "")
+    line("rgwi_need", "$/GW-inference needed at this GW and inference share", "$B/GW", lambda c: f"=IF({c}{R['gw']}*{inp('inf_share', c)}=0,0,{c}{R['dem']}/({c}{R['gw']}*{inp('inf_share', c)}))", B, "demand / (GW x inference share)", F_GREEN)
     r += 1
 
     group("Momentum path (annualised run-rate)")
@@ -261,7 +262,8 @@ def build_company(wb: Workbook, co: str, name: str) -> Dict[str, int]:
 
     t = R["tgt"]
     wline("Implied $/GW (total) at Base GW", None, lambda c: f"={c}${t}/$D${R['gw']}", B, "target / Base GW")
-    wline("Implied GW at $/GW =", 35, lambda c: f"={c}${t}/$B{r}", "0.0", "the deck's $35B/GW assumption (editable)")
+    wline("Implied $/GW-inference at Base GW and Base inference share", None, lambda c: f"={c}${t}/($D${R['gw']}*{inp_base('inf_share')})", B, "target / (Base GW x Base inference share)")
+    wline("Implied GW at deck economics ($/GW-inf x inference share, Inputs Base)", None, lambda c: f"={c}${t}/({inp_base('deck_rgw_inf')}*{inp_base('deck_inf_share')})", "0.0", "target / ($30B x 52.5%)")
     wline("Implied GW at Base $/GW", None, lambda c: f"={c}${t}/$D${R['rgw']}", "0.0", "")
     up = wline("Required uplift on enterprise engines vs Base", None, lambda c: f"=({c}${t}-($D${R['total']}-$D${R['ent']}))/$D${R['ent']}", "0.00x", "consumer + other held at Base")
     wline("...if only developer spend/salary moves", None, lambda c: f"={inp_base('ratio_dev')}*(1+({c}{up}-1)*$D${R['ent']}/$D${R['seg_dev']})", P, "vs Base ratio on Inputs")
@@ -307,11 +309,15 @@ def build_sensitivity(wb: Workbook):
             r += 1
         r += 1
 
-    grid("Revenue ($B) = GW x $/GW", "GW", "$B/GW", [10, 15, 20, 25, 30], [8, 10.5, 14, 20, 28, 35],
-         lambda rc, cc: f"={rc}*{cc}", '0" GW"', '"$"0.0"B/GW"', "#,##0")
-    grid("$/GW of TOTAL capacity ($B) = tokens/GW (1e15) x $/M tokens x inference share x utilisation (Base)",
-         "q tokens/GW-yr", "$/M tokens", [12, 16, 20, 24, 32], [0.8, 1.2, 1.6, 2.2, 3.0],
-         lambda rc, cc: f"={rc}*{cc}*{inp_base('inf_share')}*{inp_base('util')}", '0"q"', '"$"0.0"/M"', "#,##0.0")
+    grid("Revenue ($B) = total GW x deck inference share (Inputs Base) x $/GW-inference", "GW total", "$B/GW-inference",
+         [10, 15, 20, 25, 30], [15, 20, 25, 30, 35, 40],
+         lambda rc, cc: f"={rc}*{inp_base('deck_inf_share')}*{cc}", '0" GW"', '"$"0"B/GW-inf"', "#,##0")
+    grid("Revenue ($B) at deck GW (Inputs Base) = inference share x $/GW-inference", "inference share", "$B/GW-inference",
+         [0.45, 0.50, 0.55, 0.60, 0.65], [15, 20, 25, 30, 35, 40],
+         lambda rc, cc: f"={inp_base('deck_gw')}*{rc}*{cc}", "0%", '"$"0"B/GW-inf"', "#,##0")
+    grid("$/GW-inference ($B) = tokens/GW-yr (1e15) x realised $/M tokens x utilisation (Base)",
+         "q tokens/GW-yr", "$/M tokens", [12, 16, 20, 24, 28, 32], [0.8, 1.2, 1.6, 2.0, 2.4, 3.0],
+         lambda rc, cc: f"={rc}*{cc}*{inp_base('util')}", '0"q"', '"$"0.0"/M"', "#,##0.0")
     grid("OpenAI ads revenue ($B) = free MAU (M) x ads ARPU ($/yr)", "free MAU (M)", "$/free user/yr",
          [1400, 1900, 2300], [15, 30, 45, 60, 80], lambda rc, cc: f"={rc}*{cc}/1000", "#,##0", '"$"0', "#,##0")
     grid("OpenAI consumer subscriptions ($B) = MAU (M) x paid conversion x Base ARPU x 12", "MAU (M)", "paid conversion",
@@ -323,9 +329,60 @@ def build_sensitivity(wb: Workbook):
          [0.30, 0.45, 0.60], [900, 1800, 2700, 3600], lambda rc, cc: f"={inp_base('kw_pro')}*{rc}*{cc}/1000", "0%", '"$"#,##0', "#,##0")
     grid("Machine / agent API global pool ($B) = labour pool (Base, $T) x automated share x vendor capture", "automated share", "vendor capture",
          [0.05, 0.10, 0.15, 0.20], [0.15, 0.20, 0.25, 0.30, 0.35], lambda rc, cc: f"={inp_base('auto_pool')}*1000*{rc}*{cc}", "0%", "0%", "#,##0")
-    grid("Gross margin on inference = 1 - (compute cost per GW / revenue per GW)", "$B revenue/GW", "$B cost/GW-yr",
-         [10.5, 13.5, 20, 28, 35], [6, 8, 10, 13.3], lambda rc, cc: f"=1-{cc}/{rc}", '"$"0.0"B"', '"$"0.0"B"', "0%")
+    grid("Gross margin on inference = 1 - (compute cost per GW-yr / revenue per GW of inference)", "$B revenue/GW-inf", "$B cost/GW-yr",
+         [15, 21.8, 30, 40, 50], [6, 8, 10, 13.3], lambda rc, cc: f"=1-{cc}/{rc}", '"$"0.0"B"', '"$"0.0"B"', "0%")
     set_widths(ws, [34, 12, 12, 12, 12, 12, 12])
+
+
+# ---------------------------------------------------------------------------
+# Deck check
+# ---------------------------------------------------------------------------
+def build_deck_check(wb: Workbook) -> Dict[str, int]:
+    ws = wb.create_sheet("Deck_check")
+    R: Dict[str, int] = {}
+    ws["A1"] = "Deck check: revenue = total GW x share of capacity in inference x revenue per GW of inference"
+    ws["A1"].font = F_TITLE
+    ws["A2"] = "Deck inputs live on Inputs (group 'Deck'). Realised anchors apply the same 50-55% inference share to today's fleets."
+    ws["A2"].font = F_NOTE
+    headers = ["Line", "Unit", "Bear", "Base", "Bull", "Custom", "Formula / note"]
+    for i, h in enumerate(headers, start=1):
+        ws.cell(row=4, column=i, value=h)
+    style_header(ws, 4, len(headers))
+    r = 5
+    B = "#,##0.0;(#,##0.0);-"
+
+    def line(key, label, unit, fn, fmt, note="", font=F_BLACK, total=False):
+        nonlocal r
+        ws.cell(row=r, column=1, value=label).font = F_BOLD if total else F_BLACK
+        ws.cell(row=r, column=2, value=unit)
+        for col in ("C", "D", "E", "F"):
+            cell = ws[f"{col}{r}"]
+            cell.value = fn(col)
+            cell.font = Font(name=FONT, bold=True, color=font.color) if total else font
+            cell.number_format = fmt
+            if total:
+                cell.fill = FILL_TOTAL
+        ws.cell(row=r, column=7, value=note).font = F_NOTE
+        R[key] = r
+        r += 1
+
+    line("gw", "Deck: total GW per company", "GW", lambda c: f"={inp('deck_gw', c)}", "0.0", "", F_GREEN)
+    line("sh", "Deck: share of capacity in inference", "%", lambda c: f"={inp('deck_inf_share', c)}", "0.0%", "", F_GREEN)
+    line("rgwi", "Deck: revenue per GW of inference", "$B/GW", lambda c: f"={inp('deck_rgw_inf', c)}", B, "", F_GREEN)
+    line("rev", "Deck revenue = GW x share x $/GW-inference", "$B", lambda c: f"={c}{R['gw']}*{c}{R['sh']}*{c}{R['rgwi']}", B, "", total=True)
+    line("rgwt", "Deck implied $/GW of TOTAL capacity", "$B/GW", lambda c: f"={c}{R['sh']}*{c}{R['rgwi']}", B, "share x $/GW-inference")
+    line("model", "Model 2030 $/GW-inference (tokens/GW x price x utilisation)", "$B/GW", lambda c: f"={inp('tok_per_gw', c)}*{inp('price_tok', c)}*{inp('util', c)}", B, "same scenario column on Inputs", F_GREEN)
+    line("vs_model", "Deck $/GW-inference vs model", "x", lambda c: f"=IF({c}{R['model']}=0,0,{c}{R['rgwi']}/{c}{R['model']})", "0.00x", "")
+    line("oai_real", "Realised OpenAI 2025 $/GW-inference", "$B/GW", lambda c: f"={inp('oai_rr_2025', c)}/({inp('oai_gw_2025', c)}*{inp('inf_share_today', c)})", B, "run-rate / (GW x inference share today)", F_GREEN)
+    line("ant_real", "Realised Anthropic 2026E $/GW-inference", "$B/GW", lambda c: f"={inp('ant_rr26', c)}/({inp('ant_gw_2026', c)}*{inp('inf_share_today', c)})", B, "exit-2026 run-rate / (GW x inference share today)", F_GREEN)
+    line("vs_oai", "Deck vs OpenAI 2025", "x", lambda c: f"=IF({c}{R['oai_real']}=0,0,{c}{R['rgwi']}/{c}{R['oai_real']})", "0.00x", "")
+    line("vs_ant", "Deck vs Anthropic 2026E", "x", lambda c: f"=IF({c}{R['ant_real']}=0,0,{c}{R['rgwi']}/{c}{R['ant_real']})", "0.00x", "")
+    r += 1
+    line("gm8", "Gross margin on inference at $8B cost per GW-yr", "%", lambda c: f"=IF({c}{R['rgwi']}=0,0,1-8/{c}{R['rgwi']})", "0%", "owned / custom-silicon compute (~$8B per GW-yr)")
+    line("gm13", "Gross margin on inference at $13.3B cost per GW-yr", "%", lambda c: f"=IF({c}{R['rgwi']}=0,0,1-13.3/{c}{R['rgwi']})", "0%", "rented at Oracle-OpenAI pricing ($300B/5yr/4.5GW)")
+    ws.freeze_panes = "C5"
+    set_widths(ws, [58, 10, 12, 12, 12, 12, 55])
+    return R
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +422,17 @@ def build_summary(wb: Workbook, R: Dict[str, Dict[str, int]]):
         cell.number_format = "#,##0.0;(#,##0.0);-"
         cell.fill = FILL_TOTAL
         cell.font = F_BOLD
-    r += 2
+    r += 1
+    for label, key, fmt in (("Deck check: 25 GW x inference share x $/GW-inference (per company)", "rev", "#,##0.0;(#,##0.0);-"),
+                            ("Deck $/GW-inference vs model 2030", "vs_model", "0.00x"),
+                            ("Deck $/GW-inference vs realised Anthropic 2026E", "vs_ant", "0.00x")):
+        ws.cell(row=r, column=1, value=label)
+        for j, col in enumerate(("C", "D", "E", "F"), start=2):
+            cell = ws.cell(row=r, column=j, value=f"=Deck_check!{col}{R['Deck_check'][key]}")
+            cell.font = F_GREEN
+            cell.number_format = fmt
+        r += 1
+    r += 1
     ws.cell(row=r, column=1, value="Reference points (2026)").font = F_BOLD
     r += 1
     refs = [
@@ -444,6 +511,7 @@ def main(out: str):
     wb = Workbook()
     build_inputs(wb)
     R = {"OpenAI": build_company(wb, "oai", "OpenAI"), "Anthropic": build_company(wb, "ant", "Anthropic")}
+    R["Deck_check"] = build_deck_check(wb)
     build_sensitivity(wb)
     build_sources(wb)
     build_summary(wb, R)

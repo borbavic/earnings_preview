@@ -20,14 +20,14 @@ Para contexto: a mediana de superforecasters para OpenAI+Anthropic combinados em
 
 **Três pontos que precisam estar explícitos no deck:**
 
-1. **A aritmética de GW não fecha como está.** 25 GW × $35B/GW = $875B, não $350-400B. $350-400B corresponde a 10-11 GW a $35B/GW, ou a 25 GW a $14-16B/GW. Precisamos escolher uma das duas teses, porque elas contam histórias diferentes (ver seção 5).
-2. **$35B/GW é bull, não base.** OpenAI hoje realiza ~$10B por GW de capacidade total (0,2 GW → $2B em 2023; 1,9 GW → $20B em 2025). Anthropic realiza ~$18-20B/GW (~5 GW no fim de 2026 vs. run-rate de saída de ~$90B). Nosso base 2030 é $13,5B/GW. Chegar a $35B/GW exige ganho simultâneo nas quatro alavancas: share de inferência na frota, utilização, tokens/GW (Rubin) e preço realizado por token.
-3. **O gargalo é compute, não demanda.** No base, o bottom-up da Anthropic ($259B) excede a capacidade de 16 GW a $13,5B/GW ($216B). Ou ela chega a ~19 GW, ou realiza ~$16B/GW. Para OpenAI, 22 GW a $13,5B/GW ($297B) fecha exatamente com o bottom-up ($298B).
+1. **A aritmética do deck fecha com a definição certa.** Receita = GW totais × share de inferência × receita por GW de inferência: 25 GW × 50-55% × $30B = $375-410B (com $28B, $350B). Em receita por GW de capacidade total isso equivale a $14-17,6B, perto do nosso base ($13,5B). O deck não está pedindo economics muito acima dos nossos; está pedindo mais GW.
+2. **$30B por GW de inferência é ~flat vs. Anthropic hoje e +50% vs. OpenAI.** Aplicando os mesmos 50-55% de inferência às frotas atuais: OpenAI 2025 realizou ~$20B por GW de inferência (1,9 GW, $20B de run-rate); Anthropic 2026E ~$34B (~5 GW no fim do ano, ~$90B de run-rate). Nosso base 2030 é $21,8B (20 quadrilhões de tokens/GW × $1,6/M realizado × 68% de utilização); bull $65B. O deck assume que tokens por GW sobem na mesma velocidade em que o preço por token cai. É defensável, mas é a premissa central e merece um slide próprio (seção 5).
+3. **A diferença para o nosso base está nos GW e no share de inferência, não na demanda.** O deck usa 25 GW por empresa; nosso base tem 22 para OpenAI (alvo da empresa: 30) e 16 para Anthropic (~10 GW em 2027; 25 em 2030 exige +5 GW/ano). Nosso share de inferência é 62% (sobe com a escala); com 50-55%, o mesmo $/GW de inferência rende 15-20% menos por GW total. No base, o bottom-up da Anthropic ($259B) já excede a capacidade de 16 GW ($216B): ela precisa de ~19 GW ou de ~$26B por GW de inferência a 62%. Para OpenAI, 22 GW ($297B) fecha com o bottom-up ($298B).
 
 **O que é consenso e o que é diferenciado:**
 
 - Consenso (planos das empresas e sell-side que os replica): OpenAI ~$300B em 2030, mix consumer/enterprise 50/50, ads $100B; Anthropic ~$200B em 2028, ~80% API/enterprise.
-- Diferenciado (nosso): a restrição é $/GW, não penetração. O debate certo com o time não é "quantos usuários" e sim "quanto de receita por GW e por que". E o motor que decide a Anthropic é gasto por desenvolvedor em agentes (base $9,75k/dev/ano vs. $1,8-3k hoje), não assentos de knowledge worker.
+- Diferenciado (nosso): a restrição é GW × receita por GW de inferência, não penetração. O debate certo com o time é "quantos GW cada empresa terá online em 2030 e quanto cada GW de inferência fatura". E o motor de demanda que decide a Anthropic é gasto por desenvolvedor em agentes (base $9,75k/dev/ano vs. $1,8-3k hoje), não assentos de knowledge worker.
 
 ---
 
@@ -47,18 +47,18 @@ DEMANDA (bottom-up)                    OFERTA (compute)                         
 | Momentum | O que o run-rate atual já embute | Extrapola desaceleração sem dizer de onde vem a receita |
 | Base rates | Se o número é plausível vs. folha salarial, software, ads | Só dá ordem de grandeza |
 
-A ponte de $/GW é o slide central:
+A ponte de receita por GW é o slide central. Receita por GW de inferência = tokens por GW-ano × preço realizado por token × utilização; receita por GW total = isso × share de inferência.
 
-| Receita por GW de capacidade total | Valor | Como se chega |
-|---|---|---|
-| OpenAI 2023 | ~$10B | 0,2 GW → $2B run-rate |
-| OpenAI 2025 | ~$10,5B | 1,9 GW → >$20B run-rate |
-| Anthropic 2026 (est.) | ~$18-20B | ~5 GW fim-26 vs. ~$90B run-rate de saída |
-| Base 2030 | $13,5B | 20q tokens/GW × $1,6/M × 68% util × 62% inferência |
-| Bull 2030 | $47B | 32q × $2,6/M × 78% × 72% |
-| Deck (atual) | $35B | Exige tudo do bull ao mesmo tempo |
+| | $/GW de inferência | Share de inferência | $/GW total | Como se chega |
+|---|---|---|---|---|
+| OpenAI 2023 | ~$19B | 52,5% (premissa) | ~$10B | 0,2 GW → $2B run-rate |
+| OpenAI 2025 | ~$20B | 52,5% (premissa) | ~$10,5B | 1,9 GW → >$20B run-rate |
+| Anthropic 2026E | ~$34B | 52,5% (premissa) | ~$18B | ~5 GW fim-26 vs. ~$90B run-rate de saída |
+| Base 2030 | $21,8B | 62% | $13,5B | 20q tokens/GW × $1,6/M × 68% util |
+| Bull 2030 | $65B | 72% | $47B | 32q × $2,6/M × 78% |
+| Deck | $30B | 50-55% | $15-16,5B | 25 GW → $375-410B |
 
-Leitura: o preço realizado por token cai, mas tokens por GW sobem com Rubin e o share de inferência sobe quando a receita escala. $13,5B/GW assume que esses efeitos quase se cancelam. $35B/GW assume que capacidade vira receita quase 1:1 com margem de software madura (ver tabela de margem bruta na seção 5).
+Leitura: o preço realizado por token cai 5-10x por ano por unidade de capacidade, mas tokens por GW sobem com Rubin e o mix migra para modelos maiores e agentes. Nosso base assume que os efeitos quase se cancelam e o $/GW de inferência fica entre o da OpenAI e o da Anthropic hoje. O deck assume que a Anthropic de hoje é o padrão de 2030 para as duas empresas. O share de inferência é a segunda diferença: 50-55% no deck vs. 62% no nosso base; quanto mais receita, menor a fração da frota que treino e pesquisa justificam.
 
 ---
 
@@ -141,45 +141,58 @@ Resultado OpenAI consumer ($B): subs 12 / 26 / 65; ads 22 / 56 / 125; commerce 2
 
 ## 5. Reconciliação com GW
 
-### 5.1 Receita = GW × $/GW
+### 5.1 Receita = GW totais × share de inferência × $/GW de inferência
 
-| GW \ $/GW | $8B | $10,5B | $14B | $20B | $28B | $35B |
+Com 52,5% da capacidade em inferência ($B):
+
+| GW totais \ $/GW-inf | $15B | $20B | $25B | $30B | $35B | $40B |
 |---|---|---|---|---|---|---|
-| 10 GW | 80 | 105 | 140 | 200 | 280 | 350 |
-| 15 GW | 120 | 158 | 210 | 300 | 420 | 525 |
-| 20 GW | 160 | 210 | 280 | 400 | 560 | 700 |
-| 25 GW | 200 | 262 | 350 | 500 | 700 | 875 |
-| 30 GW | 240 | 315 | 420 | 600 | 840 | 1.050 |
+| 10 GW | 79 | 105 | 131 | 158 | 184 | 210 |
+| 15 GW | 118 | 158 | 197 | 236 | 276 | 315 |
+| 20 GW | 158 | 210 | 262 | 315 | 368 | 420 |
+| 25 GW | 197 | 262 | 328 | 394 | 459 | 525 |
+| 30 GW | 236 | 315 | 394 | 472 | 551 | 630 |
 
-Duas teses possíveis para $350-400B: (a) 10-11 GW a $35B/GW, "poucos GW muito rentáveis"; (b) 25-28 GW a $14B/GW, "muitos GW com economics de hoje". A tese (b) é consistente com os planos de capacidade anunciados (OpenAI 30 GW em 2030; Anthropic ~10 GW já em 2027) e com o $/GW realizado. A tese (a) contradiz os anúncios de capacidade, a menos que grande parte dos GW seja treino.
+Com 25 GW totais ($B):
 
-### 5.2 O que constrói o $/GW
+| Share de inferência \ $/GW-inf | $15B | $20B | $25B | $30B | $35B | $40B |
+|---|---|---|---|---|---|---|
+| 45% | 169 | 225 | 281 | 338 | 394 | 450 |
+| 50% | 188 | 250 | 312 | 375 | 438 | 500 |
+| 55% | 206 | 275 | 344 | 413 | 481 | 550 |
+| 60% | 225 | 300 | 375 | 450 | 525 | 600 |
+| 65% | 244 | 325 | 406 | 488 | 569 | 650 |
 
-$/GW de capacidade total = tokens/GW-ano × preço realizado × utilização × share de inferência. Na tabela abaixo, utilização e share de inferência estão no base (68% × 62% = 0,42):
+Leitura: o deck ($394B) é a célula 25 GW × $30B. Com o $/GW de inferência do nosso base ($21,8B) e o mesmo share, 25 GW dão $286B; para $350-400B seriam necessários 31-35 GW. Com o $/GW de inferência da Anthropic hoje ($34B), 25 GW dão $446B. A tese do deck é "muitos GW com os economics atuais da Anthropic", consistente com os anúncios de capacidade (OpenAI 30 GW em 2030; Anthropic ~10 GW em 2027, ainda sem número público para 2030).
 
-| tokens/GW-ano \ $/M tokens | $0,8 | $1,2 | $1,6 | $2,2 | $3,0 |
-|---|---|---|---|---|---|
-| 12 quadrilhões | 4,0 | 6,1 | 8,1 | 11,1 | 15,2 |
-| 16 | 5,4 | 8,1 | 10,8 | 14,8 | 20,2 |
-| 20 | 6,7 | 10,1 | 13,5 | 18,6 | 25,3 |
-| 24 | 8,1 | 12,1 | 16,2 | 22,3 | 30,4 |
-| 32 | 10,8 | 16,2 | 21,6 | 29,7 | 40,5 |
+### 5.2 O que constrói o $/GW de inferência
 
-Âncoras: OpenAI processa ~15B tokens/min na API (mar-26), ~8 quadrilhões/ano, mais o consumo do ChatGPT; Google processa 3,2 quadrilhões/mês (mai-26). Preço realizado hoje: OpenAI ~$2-2,5/M (subs incluídas), Anthropic ~$5/M (API, output pesado de coding). Lista set-26: Opus 5.5 $4/$20, GPT-6 Sol $2/$10, Gemini Flash $0,75/$3,75. Para $35B/GW com o mix base de utilização e inferência, precisa de 32 quadrilhões a $2,6/M ou equivalente.
+$/GW de inferência = tokens por GW-ano × preço realizado por token × utilização. Na tabela abaixo a utilização está no base (68%); valores em $B por GW de inferência:
+
+| tokens/GW-ano \ $/M tokens | $0,8 | $1,2 | $1,6 | $2,0 | $2,4 | $3,0 |
+|---|---|---|---|---|---|---|
+| 12 quadrilhões | 6,5 | 9,8 | 13,1 | 16,3 | 19,6 | 24,5 |
+| 16 | 8,7 | 13,1 | 17,4 | 21,8 | 26,1 | 32,6 |
+| 20 | 10,9 | 16,3 | 21,8 | 27,2 | 32,6 | 40,8 |
+| 24 | 13,1 | 19,6 | 26,1 | 32,6 | 39,2 | 49,0 |
+| 28 | 15,2 | 22,8 | 30,5 | 38,1 | 45,7 | 57,1 |
+| 32 | 17,4 | 26,1 | 34,8 | 43,5 | 52,2 | 65,3 |
+
+Âncoras: OpenAI processa ~15B tokens/min na API (mar-26), ~8 quadrilhões/ano, mais o consumo do ChatGPT; Google processa 3,2 quadrilhões/mês (mai-26). Preço realizado hoje: OpenAI ~$2-2,5/M (subs incluídas), Anthropic ~$5/M (API, output pesado de coding). Lista set-26: Opus 5.5 $4/$20, GPT-6 Sol $2/$10, Gemini Flash $0,75/$3,75. Os $30B do deck saem de 28 quadrilhões a $1,6/M, de 20 quadrilhões a $2,2/M ou de 24 quadrilhões a $1,85/M, sempre com 68% de utilização. O caminho mais provável é o primeiro: Rubin e Rubin Ultra multiplicam tokens por watt, e o preço realizado cai ~35% ao ano a partir do nível atual da Anthropic. O deck exige que a queda de preço não passe disso.
 
 ### 5.3 Margem bruta implícita
 
 Custo de compute alugado: Oracle-OpenAI $300B / 5 anos / 4,5 GW = ~$13,3B por GW-ano. TCO de data center próprio: ~$38B de capex + ~$0,9B/ano de opex por GW (Epoch AI), ~$8-9B por GW-ano anualizado. Só a parte de inferência entra em COGS; treino é P&D.
 
-| Receita/GW \ custo/GW-ano | $6B | $8B | $10B | $13,3B |
+| Receita por GW de inferência \ custo por GW-ano | $6B | $8B | $10B | $13,3B |
 |---|---|---|---|---|
-| $10,5B | 43% | 24% | 5% | -27% |
-| $13,5B | 56% | 41% | 26% | 1% |
-| $20B | 70% | 60% | 50% | 34% |
-| $28B | 79% | 71% | 64% | 53% |
-| $35B | 83% | 77% | 71% | 62% |
+| $15B | 60% | 47% | 33% | 11% |
+| $21,8B (base) | 72% | 63% | 54% | 39% |
+| $30B (deck) | 80% | 73% | 67% | 56% |
+| $40B | 85% | 80% | 75% | 67% |
+| $50B | 88% | 84% | 80% | 73% |
 
-Leitura: $13,5B/GW só funciona com compute próprio ou chips customizados (TPU, Trainium) a $6-8B por GW-ano. Com compute alugado a preço Oracle, $13,5B/GW dá margem zero. Anthropic guiou margem bruta de 63% em 2026 e 70% em 2027; isso é consistente com ~$18-20B/GW realizados e custo blended de $6-8B. A tese de $35B/GW é a tese de "margem de software madura" (75-80%).
+Leitura: o custo por GW-ano se aplica ao GW de inferência (COGS); o GW de treino é P&D. A $30B por GW de inferência com custo de $8-10B (compute próprio, TPU, Trainium), a margem bruta é 67-73%, coerente com o guidance da Anthropic (63% em 2026, 70% em 2027). Com compute alugado a preço Oracle ($13,3B), $30B dá 56%. Nosso base ($21,8B) dá 54-63% com custo de $8-10B. Ou seja, o número do deck é também o número que fecha o guidance de margem; se o $/GW de inferência ficar no nosso base, a margem bruta de 70% não vem sem compute próprio barato.
 
 ---
 
@@ -203,7 +216,7 @@ Base: enterprise 66% da receita, consumer 31%. A empresa fala em 50/50. A difere
 
 Supply check: 22 GW × $13,5B = $297B, fecha com o bottom-up. Momentum: $50B saída-26 × 1,75 × 1,60 × 1,45 × 1,35 = $274B.
 
-O que $350B implica (estrutura base): $15,9B/GW em 22 GW, ou 26 GW a $13,5B; uplift de 1,27x nos motores enterprise; se só o gasto por dev mover, 22% do salário ($16,6k/dev); se só a automação machine mover, 20% do pool automatizável. $400B: $18,2B/GW ou 30 GW; uplift 1,52x; 31% do salário de devs ou 30% do pool.
+O que $350B implica (estrutura base): $25,7B por GW de inferência em 22 GW a 62%, ou 22,2 GW nos economics do deck ($30B × 52,5%); uplift de 1,27x nos motores enterprise; se só o gasto por dev mover, 22% do salário ($16,6k/dev); se só a automação machine mover, 20% do pool automatizável. $400B: $29,3B por GW de inferência, ou 25,4 GW nos economics do deck; uplift 1,52x; 31% do salário de devs ou 30% do pool.
 
 ### 6.2 Anthropic 2030 ($B)
 
@@ -220,9 +233,9 @@ O que $350B implica (estrutura base): $15,9B/GW em 22 GW, ou 26 GW a $13,5B; upl
 
 Base: coding é 48% da receita, machine API 29%, assentos 16%, consumer 4%. O mix de 2026 é estimativa nossa a partir do run-rate divulgado ($65B) e do Claude Code ($8B em maio, mais o Claude dentro de Cursor e Copilot).
 
-Supply check: 16 GW × $13,5B = $216B, abaixo do bottom-up ($259B). Fecha com 19 GW ou com $16,2B/GW. Momentum: $90B saída-26 × 1,70 × 1,45 × 1,30 × 1,20 = $346B, ou seja, o run-rate atual já "embute" o número do deck se a desaceleração for gradual.
+Supply check: 16 GW × $13,5B = $216B, abaixo do bottom-up ($259B). Fecha com 19 GW, ou com $16,2B por GW total ($26B por GW de inferência a 62%). Momentum: $90B saída-26 × 1,70 × 1,45 × 1,30 × 1,20 = $346B, ou seja, o run-rate atual já "embute" o número do deck se a desaceleração for gradual.
 
-O que $350B implica: $21,9B/GW em 16 GW, ou 26 GW a $13,5B; uplift de 1,37x nos motores enterprise; se só o gasto por dev mover, 22% do salário ($16,8k/dev); se só a automação mover, 22% do pool. $400B: $25B/GW ou 30 GW; uplift 1,58x; 28% do salário de devs ou 28% do pool. Só penetração de profissionais não resolve (precisaria de >100%).
+O que $350B implica: $35,3B por GW de inferência em 16 GW a 62% (o nível da Anthropic hoje), ou 22,2 GW nos economics do deck ($30B × 52,5%); uplift de 1,37x nos motores enterprise; se só o gasto por dev mover, 22% do salário ($16,8k/dev); se só a automação mover, 22% do pool. $400B: $40,3B por GW de inferência, ou 25,4 GW nos economics do deck; uplift 1,58x; 28% do salário de devs ou 28% do pool. Só penetração de profissionais não resolve (precisaria de >100%).
 
 ---
 
@@ -259,7 +272,7 @@ Bear ($100B):
 1. **A identidade.** Demanda = oferta ≈ momentum, com os três números lado a lado (OpenAI 298 / 297 / 274; Anthropic 259 / 216 / 346). Mensagem: "o número que defendemos tem que fechar nas três lentes".
 2. **Motor enterprise.** Waterfall de 1,05B knowledge workers → tiers → penetração → gasto → share, com a tabela de âncoras 2026 (Copilot $360, Claude Code $1,8-3k, Atlanta Fed $2.068). Mensagem: "o que decide a Anthropic é gasto por dev em agentes".
 3. **Motor consumer.** MAU → pagantes / free / commerce, com a comparação de ARPU (Meta $58, Google Search $60-70, ChatGPT hoje ~$4). Mensagem: "o plano de ads da OpenAI ($100B) é Google-like; nosso base é metade".
-4. **Ponte de $/GW.** Tabela da seção 2 (de $10B hoje a $13,5B base e $35B bull) com as quatro alavancas e a tabela de margem bruta. Mensagem: "$35B/GW é a tese de margem de software; $14B/GW é a tese de capacidade".
+4. **Ponte de $/GW de inferência.** Tabela da seção 2 (OpenAI ~$20B e Anthropic ~$34B hoje; base $21,8B; deck $30B; bull $65B) com as três alavancas (tokens/GW, preço realizado, utilização), o share de inferência e a tabela de margem bruta. Mensagem: "$30B por GW de inferência é a Anthropic de hoje mantida até 2030 e fecha com 70% de margem bruta; o risco é o preço por token cair mais rápido do que tokens por GW sobem".
 5. **Cenários e o que precisa ser verdade.** Bear/base/bull por empresa e a tabela "para $350-400B precisa de X". Mensagem: "o número do deck é o topo do range; aqui está o que tem que acontecer".
 
 ---

@@ -10,7 +10,7 @@ Bottom-up framework to ground the 2030 revenue numbers used in the AI-capex / re
 | `model/build_xlsx.py` | Rebuilds the workbook from the Python assumptions |
 | `model/verify_xlsx.py` | Cross-checks the recalculated workbook against the Python model |
 
-Workbook tabs: `Summary` (both companies, four lenses) · `Inputs` (bear/base/bull/custom with 2026 anchors) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → 2026-2030 bridge → what-you-need-to-believe) · `Sensitivity` (8 two-way grids) · `Sources`.
+Workbook tabs: `Summary` (both companies, four lenses) · `Inputs` (bear/base/bull/custom with 2026 anchors) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → 2026-2030 bridge → what-you-need-to-believe) · `Deck_check` (GW × inference share × $/GW-inference vs model and realised anchors) · `Sensitivity` (9 two-way grids) · `Sources`.
 
 Rebuild after changing assumptions in the Python file:
 
