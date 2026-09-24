@@ -213,7 +213,20 @@ for _co, _name in (("oai", "OpenAI"), ("ant", "Anthropic")):
         _unit = "%" if ("share" in _key or "margin" in _key) else ("GW" if _key.startswith("gw_") else "$B")
         ASSUMPTIONS.append(A(f"v3_{_co}_{_key}", f"v3 {_name}: {_label}", _val, _val, _val, _unit, v3cell(_co, _key), "v3 reference"))
 
-AS: Dict[str, A] = {a.key: a for a in ASSUMPTIONS}
+# ---- 2026E anchors for the year-by-year block (same value in all columns; shares/conversion derived from MIX_2026) ----
+A26_GLOBAL = {"seats_dev": (12.0, "M people", "~12M paid developer seats worldwide 2026 (GitHub Copilot 4.7M, Cursor, Claude Code, Codex, others)"),
+              "sps_dev": (3200.0, "$/yr", "blended 2026 spend per paid dev seat (Copilot $100-400, Cursor $240-480, Claude Code ent. $1.8-3k, API-heavy teams >$10k)"),
+              "seats_pro": (28.0, "M people", "M365 Copilot ~20M + ChatGPT business ~9M + Claude/Gemini seats, net of overlap"),
+              "sps_pro": (900.0, "$/yr", "Copilot $360 list, ChatGPT Enterprise ~$600-900 incl. usage, Claude Team/Enterprise ~$800"),
+              "seats_gen": (15.0, "M people", "general-KW seats on $20-30/mo plans"),
+              "sps_gen": (300.0, "$/yr", "~$25/mo list, discounted"),
+              "pool_mach": (34.0, "$B", "2026E machine/agent API pool: OpenAI ~$5.5B + Anthropic ~$20B (~75% combined share) + Google/others")}
+_P26 = {"dev": A26_GLOBAL["seats_dev"][0] * A26_GLOBAL["sps_dev"][0] / 1000, "pro": A26_GLOBAL["seats_pro"][0] * A26_GLOBAL["sps_pro"][0] / 1000,
+        "gen": A26_GLOBAL["seats_gen"][0] * A26_GLOBAL["sps_gen"][0] / 1000}
+A26_CO = {"oai": {"mau": (1150.0, "M people", "ChatGPT average 2026 MAU (~1B in Jun-26)"), "arpu": (21.6, "$/mo", "blended paid ARPU 2026 (Plus $20, Pro $200, Go $8/Rs399)"),
+                  "take": (0.025, "%", "Instant Checkout take rate")},
+          "ant": {"mau": (120.0, "M people", "Claude consumer average 2026 MAU (third-party estimates 30-140M)"), "arpu": (40.0, "$/mo", "Pro $20 / Max $100-200 blend")}}
+AS: Dict[str, A] = {a.key: a for a in ASSUMPTIONS}   # rebuilt below once the 2026E anchors are appended
 
 SEGMENTS = ["Developers / coding agents", "Professional seats", "General KW seats", "Machine / agent API",
             "Consumer subscriptions", "Consumer ads", "Commerce / agentic transactions", "Other"]
@@ -224,12 +237,44 @@ MIX_2026 = {
     "oai": {"Developers / coding agents": 3.5, "Professional seats": 7.5, "General KW seats": 1.8,
             "Machine / agent API": 5.5, "Consumer subscriptions": 15.5, "Consumer ads": 1.0,
             "Commerce / agentic transactions": 0.4, "Other": 1.3},
-    "ant": {"Developers / coding agents": 22.0, "Professional seats": 8.5, "General KW seats": 0.8,
-            "Machine / agent API": 17.5, "Consumer subscriptions": 5.5, "Consumer ads": 0.0,
-            "Commerce / agentic transactions": 0.0, "Other": 2.7},
+    "ant": {"Developers / coding agents": 24.0, "Professional seats": 4.5, "General KW seats": 0.5,
+            "Machine / agent API": 20.0, "Consumer subscriptions": 5.5, "Consumer ads": 0.0,
+            "Commerce / agentic transactions": 0.0, "Other": 2.5},
 }
 assert abs(sum(MIX_2026["oai"].values()) - v3("oai", "rev_2026")) < 1e-9
 assert abs(sum(MIX_2026["ant"].values()) - v3("ant", "rev_2026")) < 1e-9
+
+
+def _anchor(key, label, val, unit, anchor):
+    ASSUMPTIONS.append(A(key, label, val, val, val, unit, anchor, "2026E anchors"))
+
+
+for _k, (_v, _u, _txt) in A26_GLOBAL.items():
+    _anchor(f"a26_{_k}", f"2026E global: {dict(seats_dev='paid developer seats (M)', sps_dev='spend per paid dev seat ($/yr)', seats_pro='paid professional seats (M)', sps_pro='spend per paid professional seat ($/yr)', seats_gen='paid general-KW seats (M)', sps_gen='spend per paid general seat ($/yr)', pool_mach='machine / agent API pool ($B)')[_k]}", _v, _u, _txt)
+for _co, _name in (("oai", "OpenAI"), ("ant", "Anthropic")):
+    _m = MIX_2026[_co]
+    _anchor(f"a26_sh_dev_{_co}", f"2026E {_name} share - developer spend", _m["Developers / coding agents"] / _P26["dev"], "%", f"derived: 2026E {_name} developer revenue ${_m['Developers / coding agents']}B / pool ${_P26['dev']:.1f}B")
+    _anchor(f"a26_sh_pro_{_co}", f"2026E {_name} share - professional seats", _m["Professional seats"] / _P26["pro"], "%", f"derived: ${_m['Professional seats']}B / ${_P26['pro']:.1f}B pool")
+    _anchor(f"a26_sh_gen_{_co}", f"2026E {_name} share - general seats", _m["General KW seats"] / _P26["gen"], "%", f"derived: ${_m['General KW seats']}B / ${_P26['gen']:.1f}B pool")
+    _anchor(f"a26_sh_auto_{_co}", f"2026E {_name} share - machine API", _m["Machine / agent API"] / A26_GLOBAL["pool_mach"][0], "%", f"derived: ${_m['Machine / agent API']}B / ${A26_GLOBAL['pool_mach'][0]:.0f}B pool")
+    _mau, _u, _txt = A26_CO[_co]["mau"]
+    _anchor(f"a26_{_co}_mau", f"2026E {_name} consumer MAU (M)", _mau, _u, _txt)
+    _arpu, _u2, _txt2 = A26_CO[_co]["arpu"]
+    _anchor(f"a26_{_co}_arpu", f"2026E {_name} paid ARPU ($/mo)", _arpu, _u2, _txt2)
+    _conv = _m["Consumer subscriptions"] * 1000 / (_mau * _arpu * 12)
+    _anchor(f"a26_{_co}_conv", f"2026E {_name} paid conversion", _conv, "%", f"derived: 2026E subs ${_m['Consumer subscriptions']}B / (MAU x ARPU x 12)")
+    if _co == "oai":
+        _anchor("a26_oai_ad_arpu", "2026E OpenAI ads ARPU per free user ($/yr)", _m["Consumer ads"] * 1000 / (_mau * (1 - _conv)), "$/yr", "derived: 2026E ads $1.0B / free MAU (ads launched Feb-26)")
+        _take = A26_CO["oai"]["take"][0]
+        _anchor("a26_oai_take", "2026E OpenAI commerce take rate", _take, "%", A26_CO["oai"]["take"][2])
+        _anchor("a26_oai_gmv", "2026E OpenAI commerce GMV via ChatGPT ($B)", _m["Commerce / agentic transactions"] / _take, "$B", "derived: 2026E commerce $0.4B / take rate")
+    _anchor(f"a26_{_co}_other", f"2026E {_name} other revenue ($B)", _m["Other"], "$B", "2026E mix estimate")
+AS = {a.key: a for a in ASSUMPTIONS}
+YEARS = [2026, 2027, 2028, 2029, 2030]
+
+
+def v3s(co: str, key: str) -> List[float]:
+    return V3[co][f"series_{key}"]["values"]
 
 
 # ---------------------------------------------------------------------------
@@ -379,6 +424,103 @@ def what_you_need(co: str, target: float, s: str = "base") -> Dict[str, str]:
     return out
 
 
+def yearly(co: str, s: str) -> Dict[str, List[float]]:
+    """Year-by-year evolution 2026E-2030E of the main inputs for scenario s (mirrors the Excel block).
+    2026E = anchors; 2030E = scenario values; 2027-29 interpolated along the scenario's calendar-revenue path
+    (levels geometric, rates linear). Enterprise shares carry a tie-out factor k so the total equals the path."""
+    import math
+    mo = momentum(co, s)
+    cal = [v3(co, "rev_2026")] + [mo[f"Calendar revenue 20{y} (avg of exit run-rates)"] for y in (27, 28, 29, 30)]
+    p = [math.log(c / cal[0]) / math.log(cal[-1] / cal[0]) for c in cal]
+
+    def geo(a, b):
+        return [a * (b / a) ** pp if a else 0.0 for pp in p]
+
+    def lin(a, b):
+        return [a + (b - a) * pp for pp in p]
+
+    def mul(*rows):
+        out = [1.0] * 5
+        for row in rows:
+            out = [x * y for x, y in zip(out, row)]
+        return out
+
+    r: Dict[str, List[float]] = {"Calendar revenue path ($B)": cal, "Progress along the path (p)": p}
+    seats, sps, pool, sh, rev = {}, {}, {}, {}, {}
+    for t in ("dev", "pro", "gen"):
+        seats[t] = geo(g(f"a26_seats_{t}", s), g(f"kw_{t}", s) * g(f"pen_{t}", s))
+        sps[t] = geo(g(f"a26_sps_{t}", s), spend_per_seat(t, s))
+        pool[t] = [a * b / 1000 for a, b in zip(seats[t], sps[t])]
+        sh[t] = lin(g(f"a26_sh_{t}_{co}", s), g(f"sh_{t}_{co}", s))
+    pool_m = geo(g("a26_pool_mach", s), machine_pool(s))
+    sh_m = lin(g(f"a26_sh_auto_{co}", s), g(f"sh_auto_{co}", s))
+    mau = geo(g(f"a26_{co}_mau", s), g(f"{co}_mau", s))
+    conv = lin(g(f"a26_{co}_conv", s), g(f"{co}_conv", s))
+    arpu = geo(g(f"a26_{co}_arpu", s), g(f"{co}_arpu", s))
+    subs = [m * c * a * 12 / 1000 for m, c, a in zip(mau, conv, arpu)]
+    free = [m * (1 - c) for m, c in zip(mau, conv)]
+    if co == "oai":
+        adarpu = geo(g("a26_oai_ad_arpu", s), g("oai_ad_arpu", s))
+        ads = [f * a / 1000 for f, a in zip(free, adarpu)]
+        gmv = geo(g("a26_oai_gmv", s), g("oai_gmv", s))
+        take = lin(g("a26_oai_take", s), g("oai_take", s))
+        comm = [a * b for a, b in zip(gmv, take)]
+    else:
+        adarpu, ads, gmv, take, comm = [0.0] * 5, [0.0] * 5, [0.0] * 5, [0.0] * 5, [0.0] * 5
+    other = lin(g(f"a26_{co}_other", s), g(f"{co}_other", s))
+    ent_raw = [sum(pool[t][i] * sh[t][i] for t in ("dev", "pro", "gen")) + pool_m[i] * sh_m[i] for i in range(5)]
+    cons = [a + b + c for a, b, c in zip(subs, ads, comm)]
+    k = [(cal[i] - cons[i] - other[i]) / ent_raw[i] for i in range(5)]
+    for t, lab in (("dev", "Developers"), ("pro", "Professionals"), ("gen", "General KW")):
+        r[f"{lab}: paid seats, global (M)"] = seats[t]
+        r[f"{lab}: spend per paid seat ($/yr)"] = sps[t]
+        r[f"{lab}: global pool ($B)"] = pool[t]
+        r[f"{lab}: company share (before tie-out)"] = sh[t]
+        r[f"{lab}: revenue ($B)"] = [pool[t][i] * sh[t][i] * k[i] for i in range(5)]
+    r["Machine API: global pool ($B)"] = pool_m
+    r["Machine API: company share (before tie-out)"] = sh_m
+    r["Machine API: revenue ($B)"] = [pool_m[i] * sh_m[i] * k[i] for i in range(5)]
+    r["Consumer: MAU (M)"] = mau
+    r["Consumer: paid conversion"] = conv
+    r["Consumer: paid ARPU ($/mo)"] = arpu
+    r["Consumer: subscriptions ($B)"] = subs
+    r["Consumer: free MAU (M)"] = free
+    r["Consumer: ads ARPU per free user ($/yr)"] = adarpu
+    r["Consumer: ads ($B)"] = ads
+    r["Consumer: commerce GMV ($B)"] = gmv
+    r["Consumer: take rate"] = take
+    r["Consumer: commerce ($B)"] = comm
+    r["Other revenue ($B)"] = other
+    r["Consumer subtotal ($B)"] = cons
+    r["Enterprise before tie-out ($B)"] = ent_raw
+    r["Tie-out factor k on enterprise shares"] = k
+    r["Enterprise after tie-out ($B)"] = [e * kk for e, kk in zip(ent_raw, k)]
+    r["Total bottom-up ($B)"] = [ent_raw[i] * k[i] + cons[i] + other[i] for i in range(5)]
+    if s == "base":
+        gw, shr, yld, cost, gm = v3s(co, "gw_avg_total"), v3s(co, "inf_share_avg"), v3s(co, "yield_inf"), v3s(co, "inf_cost_per_gw"), v3s(co, "gross_margin")
+        gw_inf = [a * b for a, b in zip(gw, shr)]
+        sup = [a * b for a, b in zip(gw_inf, yld)]
+    else:
+        gw = geo(v3s(co, "gw_avg_total")[0], g(f"{co}_gw_avg", s))
+        shr = lin(v3s(co, "inf_share_avg")[0], g(f"{co}_inf_share_avg", s))
+        yld = geo(v3s(co, "yield_inf")[0], g(f"{co}_yield_inf", s))
+        cost = lin(v3s(co, "inf_cost_per_gw")[0], g(f"{co}_cost_inf_gw", s))
+        gw_inf = [a * b for a, b in zip(gw, shr)]
+        sup = [a * b for a, b in zip(gw_inf, yld)]
+        oc = g(f"{co}_other_cor", s)
+        gm = [1 - (gi * c + oc * sr) / sr for gi, c, sr in zip(gw_inf, cost, sup)]
+    r["Supply: average total capacity (GW)"] = gw
+    r["Supply: inference share of average capacity"] = shr
+    r["Supply: average inference capacity (GW)"] = gw_inf
+    r["Supply: revenue per average inference GW-year ($B)"] = yld
+    r["Supply: revenue = inference GW x yield ($B)"] = sup
+    r["Supply: inference compute cost per GW-year ($B)"] = cost
+    r["Supply: gross margin"] = gm
+    r["Supply revenue / bottom-up total"] = [a / b for a, b in zip(sup, r["Total bottom-up ($B)"])]
+    r["Momentum: exit run-rate ($B)"] = [g(f"{co}_rr26", s)] + [mo[f"Exit-20{y} run-rate"] for y in (27, 28, 29, 30)]
+    return r
+
+
 def reconciliation(co: str) -> List[List[str]]:
     """Model Base vs v3 for the lines that must be identical."""
     c, sp, mo = company(co, "base"), supply(co, "base"), momentum(co, "base")
@@ -485,6 +627,9 @@ def report() -> str:
         parts.append(f"## {name} momentum path ($B)\n" + md_table(["Line", "Bear", "Base", "Bull"], [[k] + [fmt(mo[s][k]) for s in SCEN] for k in mo["base"].keys()]))
         parts.append(f"## {name} bridge 2026E -> 2030 base ($B)\n" + md_table(["Segment", "2026E", "2030 base", "Multiple", "CAGR"], bridge(co)))
         parts.append(f"## {name} reconciliation to v3 (Base)\n" + md_table(["Line", "Model base", "v3", "Diff"], reconciliation(co)))
+        yr = yearly(co, "base")
+        parts.append(f"## {name} year-by-year evolution (Base)\n" + md_table(["Line"] + [str(y) for y in YEARS],
+                     [[k] + [(f"{v*100:.1f}%" if ("share" in k or "conversion" in k or "margin" in k or "take" in k) else (f"{v:.3f}" if "Progress" in k or "factor" in k or "/ bottom-up" in k else fmt(v))) for v in vals] for k, vals in yr.items()]))
         for tgt in (280, 394):
             parts.append(f"## {name}: what ${tgt}B in 2030 implies\n" + md_table(["Metric", "Value"], [[k, v] for k, v in what_you_need(co, tgt).items()]))
     for title, tbl in sensitivities().items():

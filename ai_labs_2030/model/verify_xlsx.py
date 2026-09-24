@@ -4,7 +4,7 @@ import sys
 
 from openpyxl import load_workbook
 
-from revenue_2030_model import SCEN, SEGMENTS, company, deck_check, momentum, supply, v3
+from revenue_2030_model import SCEN, SEGMENTS, company, deck_check, momentum, supply, v3, yearly
 
 here = os.path.dirname(os.path.abspath(__file__))
 path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "AI_labs_revenue_2030_bottomup.xlsx")
@@ -63,6 +63,63 @@ for co, sheet in (("oai", "OpenAI"), ("ant", "Anthropic")):
             print(f"V3 MISMATCH {sheet} {label}: xlsx={xl} v3={v3(co, key)}")
     print(f"{sheet}: base total xlsx={ws['D' + str(rows['TOTAL REVENUE 2030'])].value:.6f}  v3={v3(co, 'rev_2030'):.6f}  "
           f"GM xlsx={ws['D' + str(rows['Gross margin (on supply-side revenue)'])].value:.4%} v3={v3(co, 'gross_margin_2030'):.4%}")
+
+def check_yearly(wb_, scen, tol=1e-6):
+    """Compare the year-by-year block (columns B..F) of both company sheets with yearly(co, scen)."""
+    n_bad, n_ok = 0, 0
+    for co, sheet in (("oai", "OpenAI"), ("ant", "Anthropic")):
+        ws_ = wb_[sheet]
+        rows_ = rows_of(ws_)
+        py = yearly(co, scen)
+        for label, vals in py.items():
+            if label not in rows_:
+                n_bad += 1
+                print(f"YEARLY label missing on {sheet}: {label}")
+                continue
+            rr = rows_[label]
+            for j, v in enumerate(vals):
+                xl = ws_.cell(row=rr, column=2 + j).value
+                if xl is None or abs(xl - v) > tol * max(1.0, abs(v)):
+                    n_bad += 1
+                    print(f"YEARLY MISMATCH {sheet} [{scen}] {label} {2026 + j}: xlsx={xl} py={v}")
+                else:
+                    n_ok += 1
+        # in Base the supply rows must equal the v3 yearly series
+        if scen == "base":
+            for label, key in (("Calendar revenue path ($B)", "rev"), ("Supply: average total capacity (GW)", "gw_avg_total"),
+                               ("Supply: revenue per average inference GW-year ($B)", "yield_inf"), ("Supply: gross margin", "gross_margin"),
+                               ("Momentum: exit run-rate ($B)", "exit_arr")):
+                for j, v in enumerate(v3(co, "rev_2030") and __import__("revenue_2030_model").v3s(co, key)):
+                    xl = ws_.cell(row=rows_[label], column=2 + j).value
+                    if abs(xl - v) > 1e-9 * max(1.0, abs(v)):
+                        n_bad += 1
+                        print(f"YEARLY vs v3 MISMATCH {sheet} {label} {2026 + j}: xlsx={xl} v3={v}")
+    print(f"yearly [{scen}]: {n_ok} cells ok, {n_bad} bad")
+    return n_bad
+
+
+bad += check_yearly(wb, "base")
+
+# selector test: switch both sheets to Bull, recalculate a scratch copy, compare with yearly(co, 'bull')
+import shutil, subprocess, tempfile
+from openpyxl import load_workbook as _lw
+scratch = os.path.join(tempfile.gettempdir(), "yearly_selector_test.xlsx")
+wb_f = _lw(path)  # formulas
+for sheet in ("OpenAI", "Anthropic"):
+    ws_f = wb_f[sheet]
+    for rr in range(1, ws_f.max_row + 1):
+        lab = ws_f.cell(row=rr, column=1).value
+        if isinstance(lab, str) and lab.startswith("Year-by-year evolution"):
+            ws_f.cell(row=rr, column=3).value = "Bull"
+wb_f.save(scratch)
+recalc = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "")  # placeholder
+RECALC = os.environ.get("RECALC_PY", "")
+if RECALC and os.path.exists(RECALC):
+    res = subprocess.run([sys.executable, RECALC, scratch, "240"], capture_output=True, text=True)
+    print("selector test recalc:", res.stdout.strip().replace("\n", " ")[:120])
+    bad += check_yearly(_lw(scratch, data_only=True), "bull")
+else:
+    print("selector test skipped (set RECALC_PY to the recalc.py path to run it)")
 
 ws = wb["Deck_check"]
 drows = rows_of(ws)

@@ -15,7 +15,9 @@ Bottom-up framework to ground the 2030 revenue numbers used in the AI-capex / re
 | `model/build_xlsx.py` | Rebuilds the workbook from the Python assumptions |
 | `model/verify_xlsx.py` | Cross-checks the recalculated workbook against the Python model and against v3 |
 
-Workbook tabs: `Summary` (both companies, three lenses, deck check, reconciliation to v3) · `Inputs` (bear/base/bull/custom with anchors; the two machine-API shares in Base are solved formulas so the bottom-up equals v3) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → 2026E-2030 bridge → what-you-need-to-believe) · `Deck_check` (25 GW × inference share × $/GW-inference vs v3) · `Sensitivity` (9 two-way grids) · `Sources`.
+Workbook tabs: `Summary` (both companies, three lenses, deck check, reconciliation to v3) · `Inputs` (bear/base/bull/custom with anchors; the two machine-API shares in Base are solved formulas so the bottom-up equals v3; group `2026E anchors` feeds the yearly block) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → **year-by-year evolution 2026E-2030E of the main inputs, with a scenario dropdown** → what-you-need-to-believe) · `Deck_check` (25 GW × inference share × $/GW-inference vs v3) · `Sensitivity` (9 two-way grids) · `v3_series` (the v3 yearly series 2026E-2030E the Base rows read) · `Sources`.
+
+Year-by-year block: 2026E = anchors, 2030E = the selected scenario's column, 2027-29 interpolated along the scenario's calendar-revenue path (levels geometric, rates linear); enterprise shares carry an explicit tie-out factor k so the yearly total equals the path (Base = v3 every year); in Base the supply rows (GW, inference share, yield, cost, gross margin) are the v3 yearly values. `verify_xlsx.py` checks the block in Base and, with `RECALC_PY=<path to recalc.py>`, also re-runs it with the dropdown set to Bull.
 
 Rebuild after changing assumptions in the Python file (or after a new v3: re-extract `v3_reference.json` from recalculated copies of the v3 files):
 

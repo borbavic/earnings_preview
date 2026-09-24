@@ -2,7 +2,7 @@
 
 Data: 24-set-2026. **Base = modelos MBI vBTG v3** (`OpenAI_breakeven_model_MBI_vBTG_v3.xlsx` e `Anthropic_model_MBI_vBTG_v3.xlsx`, pasta `trabalho/equityresearch/raw/empresas/ai labs`; os arquivos não estão no repo, só os valores extraídos em `model/v3_reference.json`). Dados de mercado até ago-2026, parte via imprensa financeira; revalidar os itens marcados "secundário" na aba Sources antes de usar no deck.
 
-Arquivos: modelo em `model/AI_labs_revenue_2030_bottomup.xlsx` (fórmulas vivas, coluna Custom editável, reconciliação com o v3 na aba Summary) e a mesma lógica em `model/revenue_2030_model.py`.
+Arquivos: modelo em `model/AI_labs_revenue_2030_bottomup.xlsx` (fórmulas vivas, coluna Custom editável, reconciliação com o v3 na aba Summary, evolução ano a ano 2026E-2030E nas abas OpenAI e Anthropic com dropdown de cenário) e a mesma lógica em `model/revenue_2030_model.py`.
 
 ---
 
@@ -53,6 +53,8 @@ O v3 é um modelo de capacidade × yield: receita = GW médios de inferência ×
 Como fecha: (i) os inputs de supply (GW médios, share de inferência, yield, custo por GW, outros CoR de 3%) são os do v3; (ii) o momentum usa o run-rate de saída de 2026 do v3 ($60B / $100B) e os crescimentos que reproduzem a trajetória do v3, com receita calendário = média dos run-rates de abertura e fechamento, como no v3; (iii) no bottom-up, o share de machine/agent API de cada empresa é uma fórmula na aba Inputs: (receita v3 − demais segmentos) ÷ pool de machine API. Todos os outros segmentos são escolhas explícitas. A aba Summary tem 20 linhas de reconciliação que precisam ficar em zero.
 
 O que é do v3 e o que é nosso: totais, GW, share de inferência, yield, custo e margem são v3. A abertura por segmento, os pools globais, as penetrações e os gastos por assento são nossos e servem para testar a plausibilidade do total.
+
+**Ano a ano.** Nas abas OpenAI e Anthropic, o bloco "Year-by-year evolution" (no lugar do bridge) mostra 2026E-2030E para todas as premissas principais, com um dropdown de cenário (padrão Base). Regras: 2026E são âncoras (grupo "2026E anchors" no Inputs); 2030E é a coluna do cenário escolhido; 2027-29 são interpolados ao longo da trajetória de receita calendário do cenário (níveis geométricos, taxas lineares). Os shares enterprise carregam um fator de tie-out k para que o total de cada ano seja igual à trajetória; no Base, a trajetória é a do v3 e as linhas de compute (GW médios, share de inferência, yield, custo, margem bruta) são os valores anuais do próprio v3 (aba v3_series). Ver 7.3.
 
 ---
 
@@ -247,12 +249,12 @@ O que $280B (plano da empresa) implica: 0,83x o v3; yield de $25,6B em 20,2 GW, 
 
 | Segmento | Bear | Base (v3) | Bull | 2026E | Múltiplo base | CAGR base |
 |---|---|---|---|---|---|---|
-| Devs / coding agents | 99 | 205 | 270 | 22,0 | 9,3x | 75% |
-| Assentos profissionais | 21 | 55 | 87 | 8,5 | 6,5x | 59% |
-| Assentos KW gerais | 2 | 8 | 15 | 0,8 | 10,0x | 78% |
-| Machine / agent API | 61 | 131 | 173 | 17,5 | 7,5x | 65% |
+| Devs / coding agents | 99 | 205 | 270 | 24,0 | 8,5x | 71% |
+| Assentos profissionais | 21 | 55 | 87 | 4,5 | 12,2x | 87% |
+| Assentos KW gerais | 2 | 8 | 15 | 0,5 | 16,0x | 100% |
+| Machine / agent API | 61 | 131 | 173 | 20,0 | 6,6x | 60% |
 | Subs consumer | 7 | 14 | 23 | 5,5 | 2,6x | 27% |
-| Outros | 10 | 12 | 16 | 2,7 | 4,4x | 45% |
+| Outros | 10 | 12 | 16 | 2,5 | 4,8x | 48% |
 | **Total** | **200** | **426** | **584** | **57,0** | **7,5x** | **65%** |
 
 Base: coding 48% da receita, machine API 31%, assentos 15%, consumer 3%, outros 3%. O machine API é a linha resolvida ($131B = 43,7% do pool).
@@ -260,6 +262,52 @@ Base: coding 48% da receita, machine API 31%, assentos 15%, consumer 3%, outros 
 Supply e momentum base idênticos ao v3 ($425,6B; run-rate de saída $471,9B). Bear: 16 GW × 52% × $24B = $200B de capacidade e momentum de $203B (run-rate $100B → $211B); bull: 25 GW × 58% × $40B = $580B e momentum de $568B (run-rate $110B → $637B). Margem bruta 44% / 63% / 71%.
 
 O que $394B (deck) implica: 0,93x o v3; yield de $32,4B em 22,5 GW, ou 20,8 GW no yield do v3. O que $280B implica: 0,66x; yield de $23,0B, ou 14,8 GW.
+
+### 7.3 Evolução ano a ano das premissas (Base = v3)
+
+Linhas de compute e momentum são o v3 ano a ano; as linhas de demanda são interpoladas entre as âncoras 2026E e o 2030 do v3 ao longo da trajetória de receita, com o fator k fechando o total. Valores em $B salvo indicação.
+
+OpenAI:
+
+| | 2026E | 2027E | 2028E | 2029E | 2030E |
+|---|---|---|---|---|---|
+| Receita calendário (v3) | 36,5 | 98,2 | 181,3 | 264,9 | 338,1 |
+| Run-rate de saída (v3) | 60,0 | 136,4 | 226,2 | 303,7 | 372,5 |
+| GW médios / % inferência (v3) | 3,0 / 45% | 6,4 / 47% | 11,4 / 50% | 16,2 / 52% | 20,2 / 54% |
+| Yield por GW de inferência (v3) | 27,1 | 32,4 | 31,9 | 31,4 | 30,9 |
+| Margem bruta (v3) | 50% | 58% | 59% | 59% | 59% |
+| Devs: assentos pagos globais (M) / gasto ($k) / share | 12,0 / 3,2 / 9% | 19,5 / 5,9 / 13% | 26,3 / 8,6 / 15% | 31,7 / 10,8 / 16% | 35,7 / 12,6 / 17% |
+| Devs: receita | 3,5 | 17,1 | 38,7 | 60,4 | 78,0 |
+| Profissionais: assentos (M) / gasto ($k) / share | 28 / 0,9 / 30% | 52 / 1,5 / 27% | 75 / 2,0 / 25% | 95 / 2,4 / 24% | 110 / 2,7 / 23% |
+| Profissionais: receita | 7,5 | 23,6 | 42,1 | 57,3 | 68,0 |
+| KW gerais: receita | 1,8 | 6,3 | 11,6 | 15,5 | 18,0 |
+| Machine API: pool global / share / receita | 34 / 16% / 5,5 | 90 / 16% / 16,8 | 163 / 16% / 29,5 | 236 / 16% / 40,0 | 300 / 16% / 47,3 |
+| Consumer: MAU (M) / conversão / ARPU ($/mês) | 1.150 / 5,2% / 21,6 | 1.471 / 5,8% / 21,1 | 1.713 / 6,1% / 20,8 | 1.882 / 6,4% / 20,6 | 2.000 / 6,5% / 20,5 |
+| Consumer: subs | 15,5 | 21,5 | 26,2 | 29,6 | 32,0 |
+| Consumer: free MAU (M) / ARPU de ads ($) / ads | 1.090 / 0,9 / 1,0 | 1.386 / 4,9 / 6,8 | 1.608 / 13,9 / 22,4 | 1.763 / 26,5 / 46,6 | 1.870 / 40,0 / 74,8 |
+| Commerce + outros | 1,7 | 6,1 | 10,7 | 15,6 | 20,0 |
+| Fator de tie-out k (shares enterprise) | 1,00 | 1,17 | 1,14 | 1,07 | 1,00 |
+
+Anthropic:
+
+| | 2026E | 2027E | 2028E | 2029E | 2030E |
+|---|---|---|---|---|---|
+| Receita calendário (v3) | 57,0 | 147,3 | 244,5 | 336,8 | 425,6 |
+| Run-rate de saída (v3) | 100,0 | 194,5 | 294,4 | 379,3 | 471,9 |
+| GW médios / % inferência (v3) | 3,2 / 44% | 7,5 / 47% | 12,5 / 50% | 17,5 / 52% | 22,5 / 54% |
+| Yield por GW de inferência (v3) | 40,2 | 41,8 | 39,3 | 36,9 | 35,0 |
+| Margem bruta (v3) | 70% | 68% | 66% | 64% | 63% |
+| Devs: assentos pagos globais (M) / gasto ($k) / share | 12,0 / 3,2 / 63% | 20,1 / 6,1 / 55% | 26,4 / 8,6 / 50% | 31,4 / 10,7 / 48% | 35,7 / 12,6 / 46% |
+| Devs: receita | 24,0 | 66,4 | 114,2 | 160,4 | 205,0 |
+| Profissionais: assentos (M) / gasto ($k) / share | 28 / 0,9 / 18% | 53 / 1,5 / 18% | 75 / 2,0 / 18% | 94 / 2,4 / 18% | 110 / 2,7 / 19% |
+| Profissionais: receita | 4,5 | 14,6 | 27,5 | 41,0 | 55,0 |
+| KW gerais: receita | 0,5 | 1,9 | 3,8 | 5,8 | 8,0 |
+| Machine API: pool global / share / receita | 34 / 59% / 20,0 | 95 / 52% / 48,8 | 165 / 48% / 78,5 | 233 / 46% / 106 | 300 / 44% / 131 |
+| Consumer: MAU (M) / conversão / ARPU ($/mês) / subs | 120 / 9,5% / 40 / 5,5 | 170 / 10,7% / 40 / 8,7 | 204 / 11,3% / 40 / 11,1 | 230 / 11,7% / 40 / 12,9 | 250 / 12% / 40 / 14,4 |
+| Outros | 2,5 | 7,0 | 9,4 | 10,9 | 12,0 |
+| Fator de tie-out k (shares enterprise) | 1,00 | 0,99 | 1,00 | 1,00 | 1,00 |
+
+Leitura: na Anthropic a interpolação já reproduz o v3 (k ≈ 1 em todos os anos). Na OpenAI, k de 1,17 em 2027 e 1,14 em 2028 diz que a trajetória do v3 é mais front-loaded do que a interpolação dos drivers: em 2027-28 os motores enterprise precisam crescer ~15% mais rápido do que a interpolação (ou os ads precisam ramp mais cedo, como no plano da empresa: $11B em 2027 e $25B em 2028 vs. $6,8B e $22B aqui). O fator fica visível na planilha justamente para esse tipo de leitura; qualquer célula de 2027-29 pode ser sobrescrita.
 
 ---
 

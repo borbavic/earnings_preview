@@ -3,7 +3,7 @@ Builds AI_labs_revenue_2030_bottomup.xlsx with live formulas from the assumption
 revenue_2030_model.py (Base = MBI vBTG v3 by construction). Run, then recalculate with
 LibreOffice (recalc.py) and cross-check with verify_xlsx.py.
 
-Sheets: Summary | Inputs | OpenAI | Anthropic | Deck_check | Sensitivity | Sources
+Sheets: Summary | Inputs | OpenAI | Anthropic | Deck_check | Sensitivity | v3_series | Sources
 Convention: blue = hardcoded input, black = formula, green = link to another sheet,
 yellow fill = cells the user is meant to edit (Custom scenario column, targets).
 """
@@ -15,9 +15,16 @@ from typing import Callable, Dict, List
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.datavalidation import DataValidation
 
 from revenue_2030_model import (ASSUMPTIONS, MIX_2026, SEGMENTS, V3, YEARS_2026_TO_2030,
                                 solve_machine_share)
+
+V3_SERIES_KEYS = [("rev", "calendar revenue ($B)"), ("exit_arr", "exit run-rate ARR ($B)"), ("gw_ye", "year-end capacity (GW)"),
+                  ("gw_avg_total", "average in-year total capacity (GW)"), ("gw_avg_inf", "average in-year inference capacity (GW)"),
+                  ("inf_share_ye", "inference share, year-end"), ("inf_share_avg", "inference share of average capacity"),
+                  ("yield_inf", "revenue per average inference GW-year ($B)"), ("inf_cost_per_gw", "inference compute cost per GW-year ($B)"),
+                  ("gross_margin", "gross margin"), ("ebit", "EBIT ($B)"), ("total_compute", "total compute cost ($B)")]
 
 FONT = "Arial"
 F_BLUE = Font(name=FONT, color="0000FF")
@@ -122,9 +129,42 @@ def patch_solved_inputs(wb: Workbook, R: Dict[str, Dict[str, int]]):
 
 
 # ---------------------------------------------------------------------------
+# v3 yearly series
+# ---------------------------------------------------------------------------
+def build_v3_series(wb: Workbook) -> Dict[str, Dict[str, int]]:
+    ws = wb.create_sheet("v3_series")
+    ws["A1"] = "v3 yearly series 2026E-2030E (Model tab of the MBI vBTG v3 files). The Base year-by-year supply rows on OpenAI / Anthropic read these."
+    ws["A1"].font = F_TITLE
+    for i, h in enumerate(["Line", "2026E", "2027E", "2028E", "2029E", "2030E", "v3 cells"], start=1):
+        ws.cell(row=3, column=i, value=h)
+    style_header(ws, 3, 7)
+    r = 4
+    V3S: Dict[str, Dict[str, int]] = {}
+    for co, name in (("oai", "OpenAI"), ("ant", "Anthropic")):
+        V3S[co] = {}
+        ws.cell(row=r, column=1, value=f"{name} - {V3[co]['_file']}").font = F_BOLD
+        for c in range(1, 8):
+            ws.cell(row=r, column=c).fill = FILL_GROUP
+        r += 1
+        for key, label in V3_SERIES_KEYS:
+            ser = V3[co][f"series_{key}"]
+            ws.cell(row=r, column=1, value=f"{name}: {label}")
+            for j, v in enumerate(ser["values"], start=2):
+                cell = ws.cell(row=r, column=j, value=v)
+                cell.font = F_BLUE
+                cell.number_format = "0.00%" if ("share" in key or "margin" in key) else ("0.000" if "gw" in key else B3)
+            ws.cell(row=r, column=7, value=ser["cells"]).font = F_NOTE
+            V3S[co][key] = r
+            r += 1
+        r += 1
+    set_widths(ws, [62, 12, 12, 12, 12, 12, 26])
+    return V3S
+
+
+# ---------------------------------------------------------------------------
 # Company sheets
 # ---------------------------------------------------------------------------
-def build_company(wb: Workbook, co: str, name: str) -> Dict[str, int]:
+def build_company(wb: Workbook, co: str, name: str, V3S: Dict[str, Dict[str, int]]) -> Dict[str, int]:
     ws = wb.create_sheet(name)
     R: Dict[str, int] = {}
     ws["A1"] = f"{name} - 2030 revenue, bottom-up ($B unless stated). Base column = MBI vBTG v3."
@@ -220,37 +260,151 @@ def build_company(wb: Workbook, co: str, name: str) -> Dict[str, int]:
     line("bu_vs_mom", "Bottom-up 2030 / momentum calendar 2030", "x", lambda c: f"=IF({c}{R['cal30']}=0,0,{c}{R['total']}/{c}{R['cal30']})", "0.000x", "Base = 1.000x")
     r += 1
 
-    group("Bridge: 2026E calendar revenue (v3 total; our segment split, $B) -> 2030 (multiple per scenario; CAGR on Base)")
-    hdr = ["Segment", "2026E", "Bear x", "Base x", "Bull x", "Custom x", f"CAGR (Base, {YEARS_2026_TO_2030} yrs)"]
-    for i, h in enumerate(hdr, start=1):
-        ws.cell(row=r, column=i, value=h).font = F_BOLD
+    # ---------------- Year-by-year evolution 2026E-2030E (replaces the 2026->2030 bridge) ----------------
+    ws.cell(row=r, column=1, value="Year-by-year evolution of the main inputs, 2026E-2030E   |   scenario shown:").font = F_BOLD
+    for c in range(1, 9):
+        ws.cell(row=r, column=c).fill = FILL_GROUP
+    sel = ws.cell(row=r, column=3, value="Base")
+    sel.font = F_BLUE
+    sel.fill = FILL_YELLOW
+    dv = DataValidation(type="list", formula1='"Bear,Base,Bull,Custom"', allow_blank=False)
+    ws.add_data_validation(dv)
+    dv.add(sel)
+    ws.cell(row=r, column=4, value=f"=MATCH($C${r},$C$4:$F$4,0)").font = F_NOTE
+    ws.cell(row=r, column=5, value="<- Bear / Base / Bull / Custom (dropdown)").font = F_NOTE
+    R["y_sel"] = r
+    SEL, M = f"$C${r}", f"$D${r}"
     r += 1
-    seg_keys = ["seg_dev", "seg_pro", "seg_gen", "seg_mach", "seg_subs", "seg_ads", "seg_comm", "seg_other"]
-    first = r
-    for seg, sk in zip(SEGMENTS, seg_keys):
-        ws.cell(row=r, column=1, value=seg)
-        b = ws.cell(row=r, column=2, value=MIX_2026[co][seg])
-        b.font = F_BLUE
-        b.number_format = B
-        for col in ("C", "D", "E", "F"):
-            cell = ws[f"{col}{r}"]
-            cell.value = f'=IF($B{r}=0,"n/a",{col}{R[sk]}/$B{r})'
-            cell.number_format = '0.0"x"'
-        gcell = ws[f"G{r}"]
-        gcell.value = f'=IF($B{r}=0,"n/a",(D{R[sk]}/$B{r})^(1/{YEARS_2026_TO_2030})-1)'
-        gcell.number_format = P
+    ws.cell(row=r, column=1, value=("2026E = anchors on Inputs (group '2026E anchors'); 2030E = the selected scenario's column above; 2027-29 interpolated along the "
+                                    "scenario's calendar-revenue path (levels geometric, rates linear). Enterprise shares carry a tie-out factor k so the yearly total "
+                                    "equals the path (Base = v3). In Base the supply rows are the v3 yearly values (tab v3_series).")).font = F_NOTE
+    r += 1
+    for i, h in enumerate(["Line", "2026E", "2027E", "2028E", "2029E", "2030E", "CAGR 26-30 / delta", "Formula / note"], start=1):
+        ws.cell(row=r, column=i, value=h)
+    style_header(ws, r, 8)
+    R["y_hdr"] = r
+    r += 1
+    YC = ["B", "C", "D", "E", "F"]
+
+    def idx_sheet(key):   # 2030E = the selected scenario's column of a line above on this sheet
+        return f"=INDEX($C${R[key]}:$F${R[key]},1,{M})"
+
+    def idx_inp(key):     # 2030E = the selected scenario's column on Inputs
+        return f"=INDEX(Inputs!$D${ROW[key]}:$G${ROW[key]},1,{M})"
+
+    def a26(key):
+        return f"=Inputs!$E${ROW[key]}"
+
+    def geo(col, row):
+        return f"=IF($B{row}=0,0,$B{row}*($F{row}/$B{row})^{col}${R['y_p']})"
+
+    def lin(col, row):
+        return f"=$B{row}+($F{row}-$B{row})*{col}${R['y_p']}"
+
+    def override(fn, v3row):  # Base -> v3 yearly value, else interpolation
+        return lambda col, row: f'=IF({SEL}="Base",v3_series!{col}{v3row},{fn(col, row)[1:]})'
+
+    def ygroup(title):
+        nonlocal r
+        ws.cell(row=r, column=1, value=title).font = F_BOLD
+        for c in range(1, 9):
+            ws.cell(row=r, column=c).fill = FILL_GROUP
         r += 1
-    ws.cell(row=r, column=1, value="TOTAL").font = F_BOLD
-    ws[f"B{r}"] = f"=SUM(B{first}:B{r-1})"
-    ws[f"B{r}"].number_format = B
-    for col in ("C", "D", "E", "F"):
-        ws[f"{col}{r}"] = f"={col}{R['total']}/$B{r}"
-        ws[f"{col}{r}"].number_format = '0.0"x"'
-    ws[f"G{r}"] = f"=(D{R['total']}/$B{r})^(1/{YEARS_2026_TO_2030})-1"
-    ws[f"G{r}"].number_format = P
-    ws.cell(row=r, column=8, value="2026E total = v3 calendar revenue; split is our estimate (blue = editable)").font = F_NOTE
-    R["bridge_total"] = r
-    r += 2
+
+    def yline(key, label, fn, fmt, note="", fb=None, ff=None, growth="cagr", font=F_BLACK, total=False):
+        nonlocal r
+        row = r
+        ws.cell(row=row, column=1, value=label).font = F_BOLD if total else F_BLACK
+        for col in YC:
+            cell = ws[f"{col}{row}"]
+            if col == "B" and fb is not None:
+                cell.value = fb
+            elif col == "F" and ff is not None:
+                cell.value = ff
+            else:
+                cell.value = fn(col, row) if fn is not None else None
+            cell.font = Font(name=FONT, bold=True, color=font.color) if total else font
+            cell.number_format = fmt
+            if total:
+                cell.fill = FILL_TOTAL
+        if growth == "cagr":
+            gc = ws[f"G{row}"]
+            gc.value = f'=IF(OR($B{row}<=0,$F{row}<=0),"",($F{row}/$B{row})^(1/4)-1)'
+            gc.number_format = P
+        elif growth == "delta":
+            gc = ws[f"G{row}"]
+            gc.value = f"=$F{row}-$B{row}"
+            gc.number_format = "+0.0%;-0.0%;0.0%"
+        ws.cell(row=row, column=8, value=note).font = F_NOTE
+        R[key] = row
+        r += 1
+        return row
+
+    YR = {"C": "27", "D": "28", "E": "29"}
+    yline("y_cal", "Calendar revenue path ($B)", lambda col, row: f"=INDEX($C${R['cal' + YR[col]]}:$F${R['cal' + YR[col]]},1,{M})", B3,
+          "2026E = v3 calendar revenue (all scenarios); 2027-30 = momentum block of the selected scenario (Base = v3)",
+          fb=f"=Inputs!$E${ROW['v3_' + co + '_rev_2026']}", ff=idx_sheet("cal30"), font=F_GREEN, total=True)
+    yline("y_p", "Progress along the path (p)", lambda col, row: f"=IF(LN($F${R['y_cal']}/$B${R['y_cal']})=0,0,LN({col}${R['y_cal']}/$B${R['y_cal']})/LN($F${R['y_cal']}/$B${R['y_cal']}))",
+          "0.000", "p = ln(rev_y / rev_26) / ln(rev_30 / rev_26): 0 in 2026E, 1 in 2030E", fb=0, ff=1, growth=None)
+    pending_rev = []
+    for t, lab in (("dev", "Developers"), ("pro", "Professionals"), ("gen", "General KW")):
+        ygroup(f"{lab}: seats x spend = pool; x share x k = revenue")
+        yline(f"y_seats_{t}", f"{lab}: paid seats, global (M)", geo, "#,##0.0", "anchor 2026E; 2030E = workers x penetration (scenario); geometric in between", fb=a26(f"a26_seats_{t}"), ff=idx_sheet(f"seats_{t}"), font=F_GREEN)
+        yline(f"y_sps_{t}", f"{lab}: spend per paid seat ($/yr)", geo, "$#,##0", "anchor 2026E; 2030E = salary x AI spend ratio (scenario)", fb=a26(f"a26_sps_{t}"), ff=idx_sheet(f"sps_{t}"), font=F_GREEN)
+        yline(f"y_pool_{t}", f"{lab}: global pool ($B)", lambda col, row, t=t: f"={col}{R['y_seats_' + t]}*{col}{R['y_sps_' + t]}/1000", B, "seats x spend / 1000")
+        yline(f"y_sh_{t}", f"{lab}: company share (before tie-out)", lin, "0.0%", "anchor 2026E; 2030E = Inputs share (scenario); linear in between", fb=a26(f"a26_sh_{t}_{co}"), ff=idx_inp(f"sh_{t}_{co}"), growth="delta", font=F_GREEN)
+        rr_ = yline(f"y_rev_{t}", f"{lab}: revenue ($B)", None, B, "pool x share x tie-out factor k")
+        pending_rev.append((rr_, R[f"y_pool_{t}"], R[f"y_sh_{t}"]))
+    ygroup("Machine / agent API")
+    yline("y_pool_mach", "Machine API: global pool ($B)", geo, B, "anchor 2026E; 2030E = labour pool x automated share x capture (scenario)", fb=a26("a26_pool_mach"), ff=idx_sheet("pool_mach"), font=F_GREEN)
+    yline("y_sh_auto", "Machine API: company share (before tie-out)", lin, "0.0%", "anchor 2026E; 2030E = Inputs share (Base: solved)", fb=a26(f"a26_sh_auto_{co}"), ff=idx_inp(f"sh_auto_{co}"), growth="delta", font=F_GREEN)
+    rr_ = yline("y_rev_mach", "Machine API: revenue ($B)", None, B, "pool x share x tie-out factor k")
+    pending_rev.append((rr_, R["y_pool_mach"], R["y_sh_auto"]))
+    ygroup("Consumer")
+    yline("y_mau", "Consumer: MAU (M)", geo, "#,##0", "anchor 2026E; 2030E = Inputs MAU (scenario)", fb=a26(f"a26_{co}_mau"), ff=idx_inp(f"{co}_mau"), font=F_GREEN)
+    yline("y_conv", "Consumer: paid conversion", lin, "0.00%", "", fb=a26(f"a26_{co}_conv"), ff=idx_inp(f"{co}_conv"), growth="delta", font=F_GREEN)
+    yline("y_arpu", "Consumer: paid ARPU ($/mo)", geo, "$#,##0.0", "", fb=a26(f"a26_{co}_arpu"), ff=idx_inp(f"{co}_arpu"), font=F_GREEN)
+    yline("y_subs", "Consumer: subscriptions ($B)", lambda col, row: f"={col}{R['y_mau']}*{col}{R['y_conv']}*{col}{R['y_arpu']}*12/1000", B, "MAU x conversion x ARPU x 12")
+    yline("y_free", "Consumer: free MAU (M)", lambda col, row: f"={col}{R['y_mau']}*(1-{col}{R['y_conv']})", "#,##0", "")
+    if co == "oai":
+        yline("y_adarpu", "Consumer: ads ARPU per free user ($/yr)", geo, "$#,##0.00", "anchor 2026E (~$1B ads / free MAU); 2030E = Inputs (scenario)", fb=a26("a26_oai_ad_arpu"), ff=idx_inp("oai_ad_arpu"), font=F_GREEN)
+        yline("y_ads", "Consumer: ads ($B)", lambda col, row: f"={col}{R['y_free']}*{col}{R['y_adarpu']}/1000", B, "free MAU x ads ARPU")
+        yline("y_gmv", "Consumer: commerce GMV ($B)", geo, B, "", fb=a26("a26_oai_gmv"), ff=idx_inp("oai_gmv"), font=F_GREEN)
+        yline("y_take", "Consumer: take rate", lin, "0.00%", "", fb=a26("a26_oai_take"), ff=idx_inp("oai_take"), growth="delta", font=F_GREEN)
+        yline("y_comm", "Consumer: commerce ($B)", lambda col, row: f"={col}{R['y_gmv']}*{col}{R['y_take']}", B, "GMV x take rate")
+    else:
+        yline("y_adarpu", "Consumer: ads ARPU per free user ($/yr)", lambda col, row: 0, "$#,##0.00", "Anthropic: no ads", growth=None, font=F_BLUE)
+        yline("y_ads", "Consumer: ads ($B)", lambda col, row: 0, B, "", growth=None, font=F_BLUE)
+        yline("y_gmv", "Consumer: commerce GMV ($B)", lambda col, row: 0, B, "not modelled", growth=None, font=F_BLUE)
+        yline("y_take", "Consumer: take rate", lambda col, row: 0, "0.00%", "", growth=None, font=F_BLUE)
+        yline("y_comm", "Consumer: commerce ($B)", lambda col, row: 0, B, "", growth=None, font=F_BLUE)
+    yline("y_other", "Other revenue ($B)", lin, B, "anchor 2026E; 2030E = Inputs (scenario); linear", fb=a26(f"a26_{co}_other"), ff=idx_inp(f"{co}_other"), font=F_GREEN)
+    ygroup("Tie-out to the calendar-revenue path")
+    yline("y_cons", "Consumer subtotal ($B)", lambda col, row: f"={col}{R['y_subs']}+{col}{R['y_ads']}+{col}{R['y_comm']}", B, "")
+    yline("y_ent_raw", "Enterprise before tie-out ($B)", lambda col, row: "=" + "+".join(f"{col}{R['y_pool_' + t]}*{col}{R['y_sh_' + t]}" for t in ("dev", "pro", "gen")) + f"+{col}{R['y_pool_mach']}*{col}{R['y_sh_auto']}", B, "sum of pool x share")
+    yline("y_k", "Tie-out factor k on enterprise shares", lambda col, row: f"=IF({col}{R['y_ent_raw']}=0,1,({col}{R['y_cal']}-{col}{R['y_cons']}-{col}{R['y_other']})/{col}{R['y_ent_raw']})", "0.000",
+          "(calendar revenue - consumer - other) / enterprise before tie-out; 1.000 in 2026E and 2030E by construction", growth=None)
+    yline("y_ent", "Enterprise after tie-out ($B)", lambda col, row: f"={col}{R['y_ent_raw']}*{col}{R['y_k']}", B, "")
+    yline("y_total", "Total bottom-up ($B)", lambda col, row: f"={col}{R['y_ent']}+{col}{R['y_cons']}+{col}{R['y_other']}", B3, "equals the calendar revenue path by construction", total=True)
+    yline("y_chk", "Check: total - calendar path", lambda col, row: f"={col}{R['y_total']}-{col}{R['y_cal']}", "0.000000;(0.000000);-", "must be zero", growth=None)
+    for rev_row, pool_row, sh_row in pending_rev:
+        for col in YC:
+            ws[f"{col}{rev_row}"].value = f"={col}{pool_row}*{col}{sh_row}*{col}${R['y_k']}"
+    ygroup("Supply side by year (Base = v3 yearly values; other scenarios interpolate from the 2026E v3 value to the scenario 2030E)")
+    S = V3S[co]
+    yline("y_gw", "Supply: average total capacity (GW)", override(geo, S["gw_avg_total"]), "0.000", "2026E = v3", fb=f"=v3_series!B{S['gw_avg_total']}", ff=idx_inp(f"{co}_gw_avg"), font=F_GREEN)
+    yline("y_shinf", "Supply: inference share of average capacity", override(lin, S["inf_share_avg"]), "0.00%", "2026E = v3", fb=f"=v3_series!B{S['inf_share_avg']}", ff=idx_inp(f"{co}_inf_share_avg"), growth="delta", font=F_GREEN)
+    yline("y_gwinf", "Supply: average inference capacity (GW)", lambda col, row: f"={col}{R['y_gw']}*{col}{R['y_shinf']}", "0.000", "GW x share")
+    yline("y_yield", "Supply: revenue per average inference GW-year ($B)", override(geo, S["yield_inf"]), B3, "2026E = v3", fb=f"=v3_series!B{S['yield_inf']}", ff=idx_inp(f"{co}_yield_inf"), font=F_GREEN)
+    yline("y_suprev", "Supply: revenue = inference GW x yield ($B)", lambda col, row: f"={col}{R['y_gwinf']}*{col}{R['y_yield']}", B3, "Base = v3 calendar revenue")
+    yline("y_cost", "Supply: inference compute cost per GW-year ($B)", override(lin, S["inf_cost_per_gw"]), B3, "2026E = v3", fb=f"=v3_series!B{S['inf_cost_per_gw']}", ff=idx_inp(f"{co}_cost_inf_gw"), font=F_GREEN)
+    gm_calc = lambda col, row: f'=IF({SEL}="Base",v3_series!{col}{S["gross_margin"]},IF({col}{R["y_suprev"]}=0,0,1-({col}{R["y_gwinf"]}*{col}{R["y_cost"]}+INDEX(Inputs!$D${ROW[co + "_other_cor"]}:$G${ROW[co + "_other_cor"]},1,{M})*{col}{R["y_suprev"]})/{col}{R["y_suprev"]}))'
+    yline("y_gm", "Supply: gross margin", gm_calc, "0.0%", "Base = v3 gross margin; else 1 - (inference GW x cost + other CoR) / revenue", growth="delta")
+    yline("y_supvs", "Supply revenue / bottom-up total", lambda col, row: f"=IF({col}{R['y_total']}=0,0,{col}{R['y_suprev']}/{col}{R['y_total']})", "0.000x", "1.000x in Base", growth=None)
+    ygroup("Momentum by year")
+    yline("y_rr", "Momentum: exit run-rate ($B)", lambda col, row: f"=INDEX($C${R['rr' + YR[col]]}:$F${R['rr' + YR[col]]},1,{M})", B3, "momentum block, selected scenario",
+          fb=f"=INDEX($C${R['rr26']}:$F${R['rr26']},1,{M})", ff=idx_sheet("rr30"), font=F_GREEN)
+    r += 1
 
     group("What you need to believe (targets vs Base structure)")
     ws.cell(row=r, column=1, value="Target revenue 2030 ($B)").font = F_BOLD
@@ -572,12 +726,15 @@ def build_sources(wb: Workbook):
 def main(out: str):
     wb = Workbook()
     build_inputs(wb)
-    R = {"OpenAI": build_company(wb, "oai", "OpenAI"), "Anthropic": build_company(wb, "ant", "Anthropic")}
+    V3S = build_v3_series(wb)
+    R = {"OpenAI": build_company(wb, "oai", "OpenAI", V3S), "Anthropic": build_company(wb, "ant", "Anthropic", V3S)}
     patch_solved_inputs(wb, R)
     R["Deck_check"] = build_deck_check(wb)
     build_sensitivity(wb)
     build_sources(wb)
     build_summary(wb, R)
+    order = ["Summary", "Inputs", "OpenAI", "Anthropic", "Deck_check", "Sensitivity", "v3_series", "Sources"]
+    wb._sheets = [wb[n] for n in order]
     for ws in wb.worksheets:
         for row in ws.iter_rows():
             for cell in row:
