@@ -416,5 +416,55 @@ def report() -> str:
     return "\n\n".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# CALIBRATION HELPER (align the Base column to an external model, e.g. the v3 OpenAI/Anthropic model)
+# ---------------------------------------------------------------------------
+def implied_inputs_for_targets(co: str, targets: Dict[str, float], s: str = "base") -> Dict[str, str]:
+    """Given target 2030 revenue by segment ($B) for company co, return the Base input values that
+    reproduce them with the global pools unchanged. Segments not in `targets` are left as they are.
+    Keys of `targets` are SEGMENTS labels or 'TOTAL' (TOTAL scales the four enterprise shares uniformly)."""
+    out: Dict[str, str] = {}
+    cur = company(co, s)
+    if "TOTAL" in targets:
+        non_ent = sum(cur[k] for k in SEGMENTS if k not in ENTERPRISE_SEGMENTS)
+        ent = sum(cur[k] for k in ENTERPRISE_SEGMENTS)
+        f = (targets["TOTAL"] - non_ent) / ent
+        for key in (f"sh_dev_{co}", f"sh_pro_{co}", f"sh_gen_{co}", f"sh_auto_{co}"):
+            out[key] = f"{g(key, s) * f:.4f}  (was {g(key, s):.4f}; x{f:.3f})"
+    pools = {"Developers / coding agents": (seat_pool("dev", s), f"sh_dev_{co}"),
+             "Professional seats": (seat_pool("pro", s), f"sh_pro_{co}"),
+             "General KW seats": (seat_pool("gen", s), f"sh_gen_{co}"),
+             "Machine / agent API": (machine_pool(s), f"sh_auto_{co}")}
+    for seg, tgt in targets.items():
+        if seg in pools:
+            pool, key = pools[seg]
+            out[key] = f"{tgt / pool:.4f}  (was {g(key, s):.4f}; pool {pool:,.0f})"
+        elif seg == "Consumer subscriptions":
+            # hold MAU and ARPU, solve conversion
+            conv = tgt * 1000 / (g(f"{co}_mau", s) * g(f"{co}_arpu", s) * 12)
+            out[f"{co}_conv"] = f"{conv:.4f}  (was {g(f'{co}_conv', s):.4f}; MAU/ARPU held)"
+        elif seg == "Consumer ads" and co == "oai":
+            arpu = tgt * 1000 / (g("oai_mau", s) * (1 - g("oai_conv", s)))
+            out["oai_ad_arpu"] = f"{arpu:.2f}  (was {g('oai_ad_arpu', s):.2f}; free MAU held)"
+        elif seg == "Commerce / agentic transactions" and co == "oai":
+            out["oai_gmv"] = f"{tgt / g('oai_take', s):.1f}  (was {g('oai_gmv', s):.1f}; take rate held)"
+        elif seg == "Other":
+            out[f"{co}_other"] = f"{tgt:.2f}  (was {g(f'{co}_other', s):.2f})"
+    return out
+
+
+def implied_supply_inputs(gw: float, inf_share: float, rev: float, util: float = None, s: str = "base") -> Dict[str, str]:
+    """Given an external model's GW, inference share and revenue, return the $/GW-inference and the
+    tokens/GW x price combination (at Base utilisation unless given) that reproduce it."""
+    util = g("util", s) if util is None else util
+    rgw_inf = rev / (gw * inf_share)
+    tok_price = rgw_inf / util  # tokens/GW (1e15) x $/M
+    return {"rev_per_gw_inference": f"{rgw_inf:.2f} $B/GW-inf",
+            "rev_per_gw_total": f"{rgw_inf * inf_share:.2f} $B/GW",
+            "tokens_x_price (q x $/M) at util": f"{tok_price:.2f} at util {util:.0%}",
+            "price if tokens/GW = base": f"{tok_price / g('tok_per_gw', s):.2f} $/M at {g('tok_per_gw', s):.0f}q",
+            "tokens/GW if price = base": f"{tok_price / g('price_tok', s):.1f}q at ${g('price_tok', s):.2f}/M"}
+
+
 if __name__ == "__main__":
     print(report())
