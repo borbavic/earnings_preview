@@ -12,9 +12,11 @@ Arquivos: modelo em `model/AI_labs_revenue_2030_bottomup.xlsx` (fórmulas vivas,
 
 | 2030, $B | Bear | Base (= v3) | Bull | Momentum (calendar, base) | Plano da empresa |
 |---|---|---|---|---|---|
-| OpenAI | 92 | 338 | 765 | 338 | >280 (fev-26), relatos de ~350 |
-| Anthropic | 101 | 426 | 780 | 426 | 190-200 em 2028 (caso de IPO) |
-| Combinado | 193 | 764 | 1.545 | 764 | ~500-550 |
+| OpenAI | 150 | 338 | 484 | 338 | >280 (fev-26), relatos de ~350 |
+| Anthropic | 200 | 426 | 584 | 426 | 190-200 em 2028 (caso de IPO) |
+| Combinado | 350 | 764 | 1.068 | 764 | ~500-550 |
+
+Bear = o run-rate desacelera de ~60%/ano em 2027 para ~10% em 2030, sem cair (OpenAI $58B → $159B de run-rate de saída; Anthropic $100B → $211B); yield por GW de inferência cai para $20-24B e a frota fica em 15-16 GW médios. Bull = trajetória de capacidade declarada sem haircut (27,5 e 25 GW médios), yield flat em 2026E para a Anthropic ($40B) e $30B para a OpenAI, ~1,4x o base. Nenhum dos dois é catastrófico nem "moonshot"; os três lentes fecham com ±3% em cada cenário.
 
 Referências externas: mediana de superforecasters para OpenAI+Anthropic combinados em 2030 é $300B (34% de chance de >$400B). O base combinado ($764B) é 2,5x essa mediana e ~40% acima dos planos das empresas. Bain estima que a indústria inteira precisa de $2T de receita em 2030 para pagar o capex; as duas empresas seriam 38% disso.
 
@@ -79,7 +81,7 @@ A ponte de yield por GW de inferência é o slide central:
 | Anthropic 2026E (v3) | $40,2 | 45% | $17,8 | 5 GW no fim do ano, $57B |
 | Anthropic 2030 base (v3) | $35,0 | 54,1% | $18,9 | 22,5 GW médios → $426B |
 | Deck | $30 | 50-55% | $15-16,5 | 25 GW → $375-410B |
-| Bear / bull (nosso) | $22-25 / $40-45 | 48% / 60% | $10,6-12 / $24-27 | |
+| Bear / bull (nosso) | $20-24 / $30-40 | 50-52% / 58% | $10-12,5 / $17,4-23,2 | 15-16 GW / 25-27,5 GW médios |
 
 Leitura: o preço realizado por token cai, mas tokens por GW sobem com Rubin e o mix migra para modelos maiores e agentes. O v3 assume que os efeitos quase se cancelam (OpenAI +3% acumulado no yield 2026→2030; Anthropic -13%). O deck ($30B) fica 3% abaixo do yield da OpenAI e 14% abaixo do da Anthropic no v3.
 
@@ -104,17 +106,17 @@ Quatro motores, cada um com pool global (todos os vendors) e share da empresa. O
 
 | Driver | Bear | Base | Bull | Âncora 2026 |
 |---|---|---|---|---|
-| Devs (M) / penetração paga | 36 / 70% | 42 / 85% | 46 / 92% | ~30M devs; ~10-12M assentos pagos (Copilot 4,7M, Cursor, Claude Code, Codex) = 35-40% |
-| Gasto por dev pago ($/ano) | 5.760 | 12.600 | 16.000 | Claude Code enterprise $150-250/mês = $1,8-3k; heavy users >$1k/mês |
-| Profissionais (M) / penetração | 205 / 35% | 220 / 50% | 240 / 60% | ~35-40M assentos pagos no mundo (M365 Copilot 20M, ChatGPT biz 9M) = ~4% dos KW, ~10% dos profissionais |
-| Gasto por profissional pago ($/ano) | 1.140 | 2.700 | 3.900 | Copilot $360; ChatGPT Enterprise ~$600-900 com uso; Atlanta Fed: $2.068/funcionário em IA (tudo incluso) |
-| KW gerais (M) / penetração | 770 / 15% | 790 / 30% | 815 / 40% | Produtos de assento a $20-30/mês; bundling do Copilot |
-| Gasto por KW geral ($/ano) | 232 | 420 | 640 | Copilot $360 |
-| Pool automatizável ($T) × % automatizado × captura | 7 × 7% × 20% | 8 × 12,5% × 30% | 10 × 16% × 34% | Folha global ~$58T; knowledge work $35-50T; só suporte e coding têm agentes em escala |
-| Share Anthropic: devs / pros / gerais / machine | 36/13/5/30% | 45,6/18,5/8,0/43,7% | 48/24/12/45% | Menlo: Anthropic ~54% do gasto em coding, ~32-40% da API enterprise; machine base é resolvido |
-| Share OpenAI: devs / pros / gerais / machine | 14/20/14/12% | 17,3/22,9/18,1/15,8% | 24/30/25/24% | 7M assentos enterprise; Codex 2M+ usuários semanais; API ~15-20% da receita; machine base é resolvido |
+| Devs (M) / penetração paga | 38 / 78% | 42 / 85% | 44 / 90% | ~30M devs; ~10-12M assentos pagos (Copilot 4,7M, Cursor, Claude Code, Codex) = 35-40% |
+| Gasto por dev pago ($/ano) | 7.920 | 12.600 | 14.820 | Claude Code enterprise $150-250/mês = $1,8-3k; heavy users >$1k/mês |
+| Profissionais (M) / penetração | 210 / 42% | 220 / 50% | 230 / 55% | ~35-40M assentos pagos no mundo (M365 Copilot 20M, ChatGPT biz 9M) = ~4% dos KW, ~10% dos profissionais |
+| Gasto por profissional pago ($/ano) | 1.482 | 2.700 | 3.276 | Copilot $360; ChatGPT Enterprise ~$600-900 com uso; Atlanta Fed: $2.068/funcionário em IA (tudo incluso) |
+| KW gerais (M) / penetração | 775 / 20% | 790 / 30% | 800 / 36% | Produtos de assento a $20-30/mês; bundling do Copilot |
+| Gasto por KW geral ($/ano) | 261 | 420 | 527 | Copilot $360 |
+| Pool automatizável ($T) × % automatizado × captura | 7 × 9% × 24% | 8 × 12,5% × 30% | 9 × 14% × 32% | Folha global ~$58T; knowledge work $35-50T; só suporte e coding têm agentes em escala |
+| Share Anthropic: devs / pros / gerais / machine | 42/16/6/40% | 45,6/18,5/8,0/43,7% | 46/21/10/43% | Menlo: Anthropic ~54% do gasto em coding, ~32-40% da API enterprise; machine base é resolvido |
+| Share OpenAI: devs / pros / gerais / machine | 15/22/16/14% | 17,3/22,9/18,1/15,8% | 19/25/20/18% | 7M assentos enterprise; Codex 2M+ usuários semanais; API ~15-20% da receita; machine base é resolvido |
 
-Pools globais resultantes ($B): devs 145 / 450 / 677; profissionais 82 / 297 / 562; gerais 27 / 100 / 209; machine API 98 / 300 / 544. Total enterprise 352 / 1.146 / 1.991.
+Pools globais resultantes ($B): devs 235 / 450 / 587; profissionais 131 / 297 / 414; gerais 40 / 100 / 152; machine API 151 / 300 / 403. Total enterprise 557 / 1.146 / 1.556.
 
 ### 4.3 Sobre a proposta original (MAU × salário $100k × 20%)
 
@@ -145,14 +147,14 @@ MAU 2030 (2,0B base)
 
 | Driver | Bear | Base | Bull | Âncora 2026 |
 |---|---|---|---|---|
-| ChatGPT MAU (M) | 1.500 | 2.000 | 2.500 | 1B MAU (jun-26), ~1B WAU (jul-26); internet ~5,6B → 6B; Meta DAP 3,58B |
-| Conversão paga | 4,5% | 6,5% | 9% | >50M subs consumer / ~1B = ~5%; Go grátis na Índia até dez-26 |
-| ARPU pagante ($/mês) | 15 | 20,5 | 24 | Go $8 (EUA) / ₹399; Plus $20; Pro $200 (~0,5M); blend hoje ~$25-30 caindo com mix EM |
-| ARPU de ads por free user ($/ano) | 15 | 40 | 60 | Meta 2025: $58 global, US&C ~$250+; Google Search ~$60-70/usuário; plano OpenAI $100B = ~$50/free user; hoje $1B run-rate em <200 dias |
-| GMV via ChatGPT ($B) / take rate | 100 / 2% | 480 / 2,5% | 1.000 / 3% | Instant Checkout (set-25); e-commerce global ~$7T em 2030 |
-| Claude MAU (M) / conversão / ARPU | 150 / 8% / $26 | 250 / 12% / $40 | 400 / 14% / $45 | Estimativas de terceiros 30-140M; consumer ~5-10% da receita |
+| ChatGPT MAU (M) | 1.600 | 2.000 | 2.300 | 1B MAU (jun-26), ~1B WAU (jul-26); internet ~5,6B → 6B; Meta DAP 3,58B |
+| Conversão paga | 5,2% | 6,5% | 7,5% | >50M subs consumer / ~1B = ~5%; Go grátis na Índia até dez-26 |
+| ARPU pagante ($/mês) | 16 | 20,5 | 22 | Go $8 (EUA) / ₹399; Plus $20; Pro $200 (~0,5M); blend hoje ~$25-30 caindo com mix EM |
+| ARPU de ads por free user ($/ano) | 22 | 40 | 42 | Meta 2025: $58 global, US&C ~$250+; Google Search ~$60-70/usuário; plano OpenAI $100B = ~$50/free user; hoje $1B run-rate em <200 dias |
+| GMV via ChatGPT ($B) / take rate | 150 / 2% | 480 / 2,5% | 700 / 2,7% | Instant Checkout (set-25); e-commerce global ~$7T em 2030 |
+| Claude MAU (M) / conversão / ARPU | 200 / 10% / $30 | 250 / 12% / $40 | 350 / 13% / $42 | Estimativas de terceiros 30-140M; consumer ~5-10% da receita |
 
-Resultado OpenAI consumer ($B): subs 12 / 32 / 65; ads 22 / 75 / 137; commerce 2 / 12 / 30. Consumer = 35% da receita base; a empresa projeta ~50/50, o que exigiria ads no plano dela ($100B) e subs ~$50B.
+Resultado OpenAI consumer ($B): subs 16 / 32 / 46; ads 33 / 75 / 89; commerce 3 / 12 / 19. Consumer = 35% da receita base; a empresa projeta ~50/50, o que exigiria ads no plano dela ($100B) e subs ~$50B.
 
 ### 5.3 Sobre a proposta original (1B × 5% × $20; ads a 50% da Meta)
 
@@ -168,25 +170,25 @@ Resultado OpenAI consumer ($B): subs 12 / 32 / 65; ads 22 / 75 / 137; commerce 2
 
 Com 54,1% da capacidade média em inferência (v3), $B:
 
-| GW médios \ yield | $22B | $26B | $30B | $31B | $35B | $40B |
+| GW médios \ yield | $20B | $24B | $30B | $31B | $35B | $40B |
 |---|---|---|---|---|---|---|
-| 15 GW | 179 | 211 | 243 | 252 | 284 | 325 |
-| 20 GW | 238 | 281 | 325 | 335 | 379 | 433 |
-| 22,5 GW | 268 | 316 | 365 | 377 | 426 | 487 |
-| 25 GW | 298 | 352 | 406 | 419 | 473 | 541 |
-| 30 GW | 357 | 422 | 487 | 503 | 568 | 649 |
+| 15 GW | 162 | 195 | 243 | 252 | 284 | 325 |
+| 20 GW | 216 | 260 | 325 | 335 | 379 | 433 |
+| 22,5 GW | 243 | 292 | 365 | 377 | 426 | 487 |
+| 25 GW | 271 | 325 | 406 | 419 | 473 | 541 |
+| 30 GW | 325 | 390 | 487 | 503 | 568 | 649 |
 
 Com 22,5 GW médios ($B):
 
-| Share de inferência \ yield | $22B | $26B | $30B | $31B | $35B | $40B |
+| Share de inferência \ yield | $20B | $24B | $30B | $31B | $35B | $40B |
 |---|---|---|---|---|---|---|
-| 45% | 223 | 263 | 304 | 314 | 354 | 405 |
-| 50% | 248 | 292 | 338 | 349 | 394 | 450 |
-| 54% | 267 | 316 | 364 | 377 | 425 | 486 |
-| 60% | 297 | 351 | 405 | 418 | 472 | 540 |
-| 65% | 322 | 380 | 439 | 453 | 512 | 585 |
+| 45% | 203 | 243 | 304 | 314 | 354 | 405 |
+| 50% | 225 | 270 | 338 | 349 | 394 | 450 |
+| 54% | 243 | 292 | 364 | 377 | 425 | 486 |
+| 60% | 270 | 324 | 405 | 418 | 472 | 540 |
+| 65% | 293 | 351 | 439 | 453 | 512 | 585 |
 
-Leitura: OpenAI base é a célula 20 GW × $31B ($338B); Anthropic base é 22,5 GW × $35B ($426B). O deck (25 GW × 52,5% × $30B = $394B) fica entre as duas: 1,17x o v3 da OpenAI e 0,93x o da Anthropic. Se o deck quiser um número só para as duas, $394B é uma média razoável; se quiser o v3, são $338B e $426B.
+Leitura: OpenAI base é a célula 20 GW × $31B ($338B); Anthropic base é 22,5 GW × $35B ($426B). Bear: OpenAI 15 GW × 50% × $20B = $150B, Anthropic 16 GW × 52% × $24B = $200B. Bull: 27,5 GW × 58% × $30B = $478B e 25 GW × 58% × $40B = $580B. O deck (25 GW × 52,5% × $30B = $394B) fica entre os dois v3: 1,17x o da OpenAI e 0,93x o da Anthropic. Se o deck quiser um número só para as duas, $394B é uma média razoável; se quiser o v3, são $338B e $426B.
 
 ### 6.2 O que constrói o yield
 
@@ -209,13 +211,13 @@ Custo de inferência por GW-ano no v3: OpenAI $11,7B (blend de Azure $12B, Oracl
 
 | Yield por GW de inferência \ custo por GW-ano | $8B | $10B | $11,7B | $12B | $13,3B |
 |---|---|---|---|---|---|
-| $22B (bear) | 64% | 55% | 47% | 45% | 40% |
+| $20B (bear OpenAI) | 60% | 50% | 42% | 40% | 34% |
+| $24B (bear Anthropic) | 67% | 58% | 51% | 50% | 45% |
 | $30,9B (OpenAI v3) | 74% | 68% | 62% | 61% | 57% |
 | $35B (Anthropic v3) | 77% | 71% | 67% | 66% | 62% |
-| $40B (bull OpenAI) | 80% | 75% | 71% | 70% | 67% |
-| $50B | 84% | 80% | 77% | 76% | 73% |
+| $40B (bull Anthropic) | 80% | 75% | 71% | 70% | 67% |
 
-Com os 3% de outros CoR, a margem bruta do v3 é 59,1% (OpenAI) e 62,7% (Anthropic), coerente com o guidance da Anthropic (63% em 2026, 70% em 2027). No bear ($22-25B de yield a $13,3B de custo), a margem cai para 40-45% e o breakeven da OpenAI não acontece em 2030.
+Com os 3% de outros CoR, a margem bruta do v3 é 59,1% (OpenAI) e 62,7% (Anthropic), coerente com o guidance da Anthropic (63% em 2026, 70% em 2027). No bear ($20-24B de yield a $12,5B de custo e 4% de outros CoR), a margem bruta cai para 34-44% e o breakeven de EBIT da OpenAI não acontece em 2030. No bull (custo $10,5B), 63% e 71%.
 
 ---
 
@@ -225,19 +227,19 @@ Com os 3% de outros CoR, a margem bruta do v3 é 59,1% (OpenAI) e 62,7% (Anthrop
 
 | Segmento | Bear | Base (v3) | Bull | 2026E | Múltiplo base | CAGR base |
 |---|---|---|---|---|---|---|
-| Devs / coding agents | 20 | 78 | 163 | 3,5 | 22,3x | 117% |
-| Assentos profissionais | 16 | 68 | 168 | 7,5 | 9,1x | 74% |
-| Assentos KW gerais | 4 | 18 | 52 | 1,8 | 10,0x | 78% |
-| Machine / agent API | 12 | 47 | 131 | 5,5 | 8,6x | 71% |
-| Subs consumer | 12 | 32 | 65 | 15,5 | 2,1x | 20% |
-| Ads | 22 | 75 | 137 | 1,0 | 74,8x | 194% |
-| Commerce | 2 | 12 | 30 | 0,4 | 30,0x | 134% |
-| Outros | 4 | 8 | 20 | 1,3 | 6,2x | 58% |
-| **Total** | **92** | **338** | **765** | **36,5** | **9,3x** | **74%** |
+| Devs / coding agents | 35 | 78 | 112 | 3,5 | 22,3x | 117% |
+| Assentos profissionais | 29 | 68 | 104 | 7,5 | 9,1x | 74% |
+| Assentos KW gerais | 6 | 18 | 30 | 1,8 | 10,0x | 78% |
+| Machine / agent API | 21 | 47 | 73 | 5,5 | 8,6x | 71% |
+| Subs consumer | 16 | 32 | 46 | 15,5 | 2,1x | 20% |
+| Ads | 33 | 75 | 89 | 1,0 | 74,8x | 194% |
+| Commerce | 3 | 12 | 19 | 0,4 | 30,0x | 134% |
+| Outros | 6 | 8 | 12 | 1,3 | 6,2x | 58% |
+| **Total** | **150** | **338** | **484** | **36,5** | **9,3x** | **74%** |
 
 2026E = receita calendário do v3 ($36,5B); a abertura é nossa. Base: enterprise 62,5%, consumer 35%, outros 2,4%.
 
-Supply e momentum base são idênticos ao v3 ($338,1B). Bear: 14 GW × 48% × $22B = $148B de capacidade vs. $92B de demanda; bull: 27,5 GW × 60% × $40B = $660B vs. $765B de demanda (bull é demanda-limitado por compute).
+Supply e momentum base são idênticos ao v3 ($338,1B). Bear: 15 GW × 50% × $20B = $150B de capacidade e momentum de $152B (run-rate $58B → $159B); bull: 27,5 GW × 58% × $30B = $478B e momentum de $472B (run-rate $65B → $537B). Margem bruta 34% / 59% / 63%.
 
 O que $280B (plano da empresa) implica: 0,83x o v3; yield de $25,6B em 20,2 GW, ou 16,8 GW no yield do v3. O que $394B (deck) implica: 1,17x; yield de $36,0B, ou 23,6 GW; uplift de 1,26x nos motores enterprise, o que sozinho em devs seria 29% do salário ($21,6k/dev) ou, só em automação, 27% do pool automatizável.
 
@@ -245,17 +247,17 @@ O que $280B (plano da empresa) implica: 0,83x o v3; yield de $25,6B em 20,2 GW, 
 
 | Segmento | Bear | Base (v3) | Bull | 2026E | Múltiplo base | CAGR base |
 |---|---|---|---|---|---|---|
-| Devs / coding agents | 52 | 205 | 325 | 22,0 | 9,3x | 75% |
-| Assentos profissionais | 11 | 55 | 135 | 8,5 | 6,5x | 59% |
-| Assentos KW gerais | 1 | 8 | 25 | 0,8 | 10,0x | 78% |
-| Machine / agent API | 29 | 131 | 245 | 17,5 | 7,5x | 65% |
-| Subs consumer | 4 | 14 | 30 | 5,5 | 2,6x | 27% |
-| Outros | 4 | 12 | 20 | 2,7 | 4,4x | 45% |
-| **Total** | **101** | **426** | **780** | **57,0** | **7,5x** | **65%** |
+| Devs / coding agents | 99 | 205 | 270 | 22,0 | 9,3x | 75% |
+| Assentos profissionais | 21 | 55 | 87 | 8,5 | 6,5x | 59% |
+| Assentos KW gerais | 2 | 8 | 15 | 0,8 | 10,0x | 78% |
+| Machine / agent API | 61 | 131 | 173 | 17,5 | 7,5x | 65% |
+| Subs consumer | 7 | 14 | 23 | 5,5 | 2,6x | 27% |
+| Outros | 10 | 12 | 16 | 2,7 | 4,4x | 45% |
+| **Total** | **200** | **426** | **584** | **57,0** | **7,5x** | **65%** |
 
 Base: coding 48% da receita, machine API 31%, assentos 15%, consumer 3%, outros 3%. O machine API é a linha resolvida ($131B = 43,7% do pool).
 
-Supply e momentum base idênticos ao v3 ($425,6B; run-rate de saída $471,9B). Bear: 15 GW × 48% × $25B = $180B de capacidade vs. $101B de demanda; bull: 25 GW × 60% × $45B = $675B vs. $780B.
+Supply e momentum base idênticos ao v3 ($425,6B; run-rate de saída $471,9B). Bear: 16 GW × 52% × $24B = $200B de capacidade e momentum de $203B (run-rate $100B → $211B); bull: 25 GW × 58% × $40B = $580B e momentum de $568B (run-rate $110B → $637B). Margem bruta 44% / 63% / 71%.
 
 O que $394B (deck) implica: 0,93x o v3; yield de $32,4B em 22,5 GW, ou 20,8 GW no yield do v3. O que $280B implica: 0,66x; yield de $23,0B, ou 14,8 GW.
 
@@ -263,29 +265,31 @@ O que $394B (deck) implica: 0,93x o v3; yield de $32,4B em 22,5 GW, ou 20,8 GW n
 
 ## 8. Bull e bear
 
+Critério: bear = o run-rate desacelera forte mas não cai (a Anthropic sai de 2026 com ~$100B e a OpenAI chega a ~$100B em 2027 mesmo no bear); bull = os planos de capacidade batem sem haircut e o yield não cai, ~1,4x o base. Os três lentes fecham com ±3% em cada cenário.
+
 ### Anthropic
 
-Bull ($780B):
-- Devs: 46M × 92% × $16k × 48% share = $325B. Agentes rodando em paralelo viram a norma; Claude mantém a liderança em coding.
-- Machine API: pool de $544B (16% de $10T automatizado, 34% de captura), 45% de share = $245B.
-- Compute: o bottom-up ($780B) excede a capacidade bull (25 GW × 60% × $45B = $675B); o cenário é limitado por GW.
+Bull ($584B, run-rate de saída ~$637B):
+- Devs: 44M × 90% × $14,8k × 46% share = $270B. Agentes em paralelo viram a norma; Claude mantém a liderança em coding.
+- Machine API: pool de $403B (14% de $9T automatizado, 32% de captura), 43% de share = $173B.
+- Compute: 25 GW médios × 58% inferência × $40B de yield (flat em 2026E) = $580B; margem bruta 71%.
 
-Bear ($101B, run-rate estagna em 2027):
-- Open-source e modelos chineses comoditizam coding; yield cai para $25B por GW de inferência com custo de $13,3B (margem bruta ~45%).
-- Share em devs cai para 36%; gasto por dev fica em $5,8k; penetração de profissionais em 35%.
-- Compute: 15 GW médios; o caso de IPO ($190-200B em 2028) não se materializa.
+Bear ($200B, run-rate de saída ~$211B, crescendo 8% em 2030):
+- Yield cai 12%/ano para $24B por GW de inferência (open-source e modelos chineses comoditizam coding); custo de $12,5B → margem bruta 44%.
+- Share em devs 42%, gasto por dev $7,9k, penetração de profissionais 42%; machine API 40% de um pool de $151B.
+- Compute: 16 GW médios; o caso de IPO ($190-200B em 2028) só chega em 2030.
 
 ### OpenAI
 
-Bull ($765B):
-- 2,5B MAU com 9% pagantes a $24 ($65B) e ads a $60/free user ($137B), Google Search-like.
-- Enterprise: 24% do pool de devs e 30% dos assentos profissionais via ChatGPT Enterprise e Frontier; $514B.
-- 27,5 GW médios (path declarado sem haircut) a $40B de yield.
+Bull ($484B, run-rate de saída ~$537B):
+- 2,3B MAU com 7,5% pagantes a $22 ($46B) e ads a $42/free user ($89B); commerce $19B.
+- Enterprise: 19% do pool de devs, 25% dos assentos profissionais, 18% do machine API; $318B.
+- 27,5 GW médios (path de 30 GW sem haircut) × 58% × $30B (deck) = $478B; margem bruta 63%.
 
-Bear ($92B):
-- Consumer satura em 1,5B MAU; conversão 4,5%; ads em $15/free user.
-- Enterprise perde para Microsoft/Anthropic em assentos e coding; 12% de share em machine API.
-- 14 GW médios a $22B de yield; compute contratado ($750B até 2030) vira passivo e o breakeven de 2030 não vem.
+Bear ($150B, run-rate de saída ~$159B, crescendo 10% em 2030):
+- Consumer: 1,6B MAU, conversão 5,2%, ads em $22/free user ($33B).
+- Enterprise perde para Microsoft/Anthropic em assentos e coding: 15% do pool de devs, 14% do machine API; $92B.
+- 15 GW médios × 50% × $20B = $150B; margem bruta 34%; o breakeven de EBIT de 2030 não vem e o compute contratado ($750B) pesa.
 
 ---
 
@@ -301,7 +305,7 @@ Bear ($92B):
 
 ## 10. Riscos do framework
 
-- **Compounding de premissas.** Bear e bull são todos-mínimos e todos-máximos; o intervalo real é mais estreito. O bear é "run-rate estagna em 2027"; o bull é "planos das empresas batem com folga" e, nas duas, é limitado por compute.
+- **Compounding de premissas.** Bear e bull movem todos os drivers na mesma direção, mas com amplitude moderada: bear é "run-rate desacelera para ~10%/ano em 2030" ($150B / $200B) e bull é "capacidade declarada sem haircut com yield flat" (~1,4x o base). Os três lentes fecham em cada cenário; cenários mais extremos são sensibilidade, não caso.
 - **Linha resolvida.** O share de machine API no base é a variável de fechamento. Se as outras premissas mudarem, ela muda junto; se sair de um intervalo plausível (30-50%), o total v3 é que está pedindo demais.
 - **Dupla contagem entre pools.** Claude dentro do Cursor está no pool de devs; Claude via Bedrock em um bot de suporte está no machine API. A fronteira é por caso de uso, não por canal.
 - **Yield.** É a premissa mais frágil: preço por token cai 5-10x por ano por unidade de capacidade, mas o mix migra para modelos maiores e reasoning. O v3 assume compensação quase total.
