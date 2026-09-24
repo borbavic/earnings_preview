@@ -1,18 +1,23 @@
 # AI labs 2030 revenue framework (OpenAI, Anthropic)
 
 Bottom-up framework to ground the 2030 revenue numbers used in the AI-capex / revenue-per-GW deck.
+**The Base column is tied to the MBI vBTG v3 models** (`OpenAI_breakeven_model_MBI_vBTG_v3.xlsx`,
+`Anthropic_model_MBI_vBTG_v3.xlsx`, kept in `trabalho/equityresearch/raw/empresas/ai labs`, not in this repo):
+2030 revenue, average GW, inference share, revenue per inference GW-year, inference cost per GW-year,
+2026E anchors and the 2027-30 run-rate path are identical to v3; bear and bull are sensitised around it.
 
 | File | What it is |
 |---|---|
-| `docs/framework_receita_2030.md` | The framework (PT-BR): conclusion, driver trees, 2026 anchors, scenarios, GW reconciliation, slide storyboard, sources |
-| `model/AI_labs_revenue_2030_bottomup.xlsx` | Live-formula model. Edit the yellow **Custom** column on `Inputs`; everything else recalculates |
-| `model/revenue_2030_model.py` | Same assumptions and math in Python; prints all tables (`python3 revenue_2030_model.py`) |
+| `docs/framework_receita_2030.md` | The framework (PT-BR): conclusion, driver trees, 2026 anchors, scenarios, GW reconciliation, what the v3 base needs, slide storyboard, sources |
+| `model/AI_labs_revenue_2030_bottomup.xlsx` | Live-formula model. Edit the yellow **Custom** column on `Inputs`; everything else recalculates. `Summary` has a reconciliation block to v3 (all differences must be zero) |
+| `model/v3_reference.json` | The v3 values the Base is tied to, with their cell references (extracted from the recalculated v3 files) |
+| `model/revenue_2030_model.py` | Same assumptions and math in Python; prints all tables (`python3 revenue_2030_model.py`); includes calibration helpers |
 | `model/build_xlsx.py` | Rebuilds the workbook from the Python assumptions |
-| `model/verify_xlsx.py` | Cross-checks the recalculated workbook against the Python model |
+| `model/verify_xlsx.py` | Cross-checks the recalculated workbook against the Python model and against v3 |
 
-Workbook tabs: `Summary` (both companies, four lenses) · `Inputs` (bear/base/bull/custom with 2026 anchors) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → 2026-2030 bridge → what-you-need-to-believe) · `Deck_check` (GW × inference share × $/GW-inference vs model and realised anchors) · `Sensitivity` (9 two-way grids) · `Sources`.
+Workbook tabs: `Summary` (both companies, three lenses, deck check, reconciliation to v3) · `Inputs` (bear/base/bull/custom with anchors; the two machine-API shares in Base are solved formulas so the bottom-up equals v3) · `OpenAI` · `Anthropic` (pools → segments → total → supply check → momentum → 2026E-2030 bridge → what-you-need-to-believe) · `Deck_check` (25 GW × inference share × $/GW-inference vs v3) · `Sensitivity` (9 two-way grids) · `Sources`.
 
-Rebuild after changing assumptions in the Python file:
+Rebuild after changing assumptions in the Python file (or after a new v3: re-extract `v3_reference.json` from recalculated copies of the v3 files):
 
 ```bash
 cd ai_labs_2030/model

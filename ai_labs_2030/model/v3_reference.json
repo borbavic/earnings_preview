@@ -1,0 +1,330 @@
+{
+ "_note": "Values read from the recalculated v3 models (Model sheet). Cell refs are on the 'Model' tab. Files kept outside the repo.",
+ "_as_of": "2026-09-24",
+ "oai": {
+  "_file": "OpenAI_breakeven_model_MBI_vBTG_v3.xlsx",
+  "rev_2030": {
+   "value": 338.098594243668,
+   "cell": "Model!I100"
+  },
+  "rev_2029": {
+   "value": 264.939811304882,
+   "cell": "Model!H100"
+  },
+  "rev_2028": {
+   "value": 181.334194292863,
+   "cell": "Model!G100"
+  },
+  "rev_2027": {
+   "value": 98.2227843038981,
+   "cell": "Model!F100"
+  },
+  "rev_2026": {
+   "value": 36.5,
+   "cell": "Model!E100"
+  },
+  "exit_arr_2030": {
+   "value": 372.5403858555,
+   "cell": "Model!I105"
+  },
+  "exit_arr_2029": {
+   "value": 303.656802631835,
+   "cell": "Model!H105"
+  },
+  "exit_arr_2028": {
+   "value": 226.222819977929,
+   "cell": "Model!G105"
+  },
+  "exit_arr_2027": {
+   "value": 136.445568607796,
+   "cell": "Model!F105"
+  },
+  "exit_arr_2026": {
+   "value": 60,
+   "cell": "Model!E105"
+  },
+  "gw_ye_2030": {
+   "value": 22.0777882545524,
+   "cell": "Model!I7"
+  },
+  "gw_stated_2030": {
+   "value": 30,
+   "cell": "Model!I8"
+  },
+  "haircut": {
+   "value": 0.264073724848253,
+   "cell": "Model!I94"
+  },
+  "gw_avg_total_2030": {
+   "value": 20.2379725666731,
+   "cell": "Model!I29"
+  },
+  "gw_avg_inf_2030": {
+   "value": 10.9469033428822,
+   "cell": "Model!I26"
+  },
+  "gw_avg_train_2030": {
+   "value": 6.95450330018401,
+   "cell": "Model!I27"
+  },
+  "gw_avg_align_2030": {
+   "value": 2.3365659236068,
+   "cell": "Model!I28"
+  },
+  "inf_share_ye_2030": {
+   "value": 0.55,
+   "cell": "Model!I15"
+  },
+  "train_share_ye_2030": {
+   "value": 0.33,
+   "cell": "Model!I14"
+  },
+  "align_share_ye_2030": {
+   "value": 0.12,
+   "cell": "Model!I16"
+  },
+  "yield_inf_2030": {
+   "value": 30.8853183090816,
+   "cell": "Model!I101"
+  },
+  "yield_inf_2026": {
+   "value": 27.0830025999354,
+   "cell": "Model!E101"
+  },
+  "rev_per_total_gw_2030": {
+   "value": 16.7061494490032,
+   "cell": "Model!I104"
+  },
+  "exit_arr_per_ye_inf_gw_2030": {
+   "value": 30.6799824462145,
+   "cell": "Model!I106"
+  },
+  "exit_arr_per_ye_inf_gw_2026": {
+   "value": 32.9413761418227,
+   "cell": "Model!E106"
+  },
+  "exit_arr_per_ye_total_gw_2030": {
+   "value": 16.873990345418,
+   "cell": "Model!I107"
+  },
+  "inf_cost_per_gw_2030": {
+   "value": 11.7004035197334,
+   "cell": "Model!I62"
+  },
+  "rd_cost_per_gw_2030": {
+   "value": 13.4554640476934,
+   "cell": "Model!I64"
+  },
+  "gross_margin_2030": {
+   "value": 0.59116616695859,
+   "cell": "Model!I119"
+  },
+  "ebit_2030": {
+   "value": 0,
+   "cell": "Model!I128"
+  },
+  "ebit_margin_2030": {
+   "value": 0,
+   "cell": "Model!I129"
+  },
+  "ebit_ex_sbc_2030": {
+   "value": 21,
+   "cell": "Model!I132"
+  },
+  "total_compute_2030": {
+   "value": 253.098834308589,
+   "cell": "Model!I133"
+  },
+  "compute_pct_rev_2030": {
+   "value": 0.748594754955357,
+   "cell": "Model!I134"
+  },
+  "cum_compute_2026_30": {
+   "value": 730.775221382979,
+   "cell": "Model!I135"
+  },
+  "rev_linked_cost_ratio_2030": {
+   "value": 0.185,
+   "cell": "Model!I98"
+  },
+  "sbc_2030": {
+   "value": 21,
+   "cell": "Model!I69"
+  },
+  "gw_ye_2026": {
+   "value": 4.04759451333461,
+   "cell": "Model!E7"
+  },
+  "inf_share_avg_2030": {
+   "value": 0.5409090909090876,
+   "cell": "Model!I26/I29"
+  }
+ },
+ "ant": {
+  "_file": "Anthropic_model_MBI_vBTG_v3.xlsx",
+  "rev_2030": {
+   "value": 425.618004862222,
+   "cell": "Model!I89"
+  },
+  "rev_2029": {
+   "value": 336.847955555556,
+   "cell": "Model!H89"
+  },
+  "rev_2028": {
+   "value": 244.462666666667,
+   "cell": "Model!G89"
+  },
+  "rev_2027": {
+   "value": 147.266666666667,
+   "cell": "Model!F89"
+  },
+  "rev_2026": {
+   "value": 57,
+   "cell": "Model!E89"
+  },
+  "exit_arr_2030": {
+   "value": 471.932098613333,
+   "cell": "Model!I90"
+  },
+  "exit_arr_2029": {
+   "value": 379.303911111111,
+   "cell": "Model!H90"
+  },
+  "exit_arr_2028": {
+   "value": 294.392,
+   "cell": "Model!G90"
+  },
+  "exit_arr_2027": {
+   "value": 194.533333333333,
+   "cell": "Model!F90"
+  },
+  "exit_arr_2026": {
+   "value": 100,
+   "cell": "Model!E90"
+  },
+  "gw_ye_2030": {
+   "value": 25,
+   "cell": "Model!I7"
+  },
+  "gw_stated_2030": {
+   "value": 25,
+   "cell": "Model!I8"
+  },
+  "gw_avg_total_2030": {
+   "value": 22.5,
+   "cell": "Model!I29"
+  },
+  "gw_avg_inf_2030": {
+   "value": 12.175,
+   "cell": "Model!I26"
+  },
+  "gw_avg_train_2030": {
+   "value": 7.825,
+   "cell": "Model!I27"
+  },
+  "gw_avg_align_2030": {
+   "value": 2.5,
+   "cell": "Model!I28"
+  },
+  "inf_share_ye_2030": {
+   "value": 0.55,
+   "cell": "Model!I15"
+  },
+  "train_share_ye_2030": {
+   "value": 0.33,
+   "cell": "Model!I14"
+  },
+  "align_share_ye_2030": {
+   "value": 0.12,
+   "cell": "Model!I16"
+  },
+  "yield_inf_2030": {
+   "value": 34.9583576888889,
+   "cell": "Model!I88"
+  },
+  "yield_inf_2026": {
+   "value": 40.169133192389,
+   "cell": "Model!E88"
+  },
+  "yield_change_2027_29": {
+   "value": -0.06,
+   "cell": "Model!F87"
+  },
+  "yield_change_2030": {
+   "value": -0.053,
+   "cell": "Model!I87"
+  },
+  "rev_per_total_gw_2030": {
+   "value": 18.9163557716543,
+   "cell": "Model!I93"
+  },
+  "exit_arr_per_ye_inf_gw_2030": {
+   "value": 34.322334444606,
+   "cell": "Model!I91"
+  },
+  "exit_arr_per_ye_inf_gw_2026": {
+   "value": 44.4444444444444,
+   "cell": "Model!E91"
+  },
+  "exit_arr_per_ye_total_gw_2030": {
+   "value": 18.8772839445333,
+   "cell": "Model!I92"
+  },
+  "inf_cost_per_gw_2030": {
+   "value": 12,
+   "cell": "Model!I62"
+  },
+  "rd_cost_per_gw_2030": {
+   "value": 13.2,
+   "cell": "Model!I64"
+  },
+  "gross_margin_2030": {
+   "value": 0.626734446543693,
+   "cell": "Model!I107"
+  },
+  "ebit_2030": {
+   "value": 48.0358739627109,
+   "cell": "Model!I116"
+  },
+  "ebit_margin_2030": {
+   "value": 0.112861470647279,
+   "cell": "Model!I117"
+  },
+  "ebit_ex_sbc_2030": {
+   "value": 65.0358739627109,
+   "cell": "Model!I120"
+  },
+  "total_compute_2030": {
+   "value": 282.39,
+   "cell": "Model!I122"
+  },
+  "compute_pct_rev_2030": {
+   "value": 0.663482269955692,
+   "cell": "Model!I123"
+  },
+  "cum_compute_2026_30": {
+   "value": 789.59497910562,
+   "cell": "Model!I124"
+  },
+  "breakeven_yield_2030": {
+   "value": 30.117312707071,
+   "cell": "Model!I94"
+  },
+  "rev_linked_cost_ratio_2030": {
+   "value": 0.185,
+   "cell": "Model!I85"
+  },
+  "sbc_2030": {
+   "value": 17,
+   "cell": "Model!I69"
+  },
+  "gw_ye_2026": {
+   "value": 5,
+   "cell": "Model!E7"
+  },
+  "inf_share_avg_2030": {
+   "value": 0.5411111111111111,
+   "cell": "Model!I26/I29"
+  }
+ }
+}
