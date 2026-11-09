@@ -1,0 +1,42 @@
+{
+  "_comment": "EXEMPLO FICTÍCIO (empresa XYZ inventada) só para testar o formato. Não é uma reunião real.",
+  "ticker": "XYZ",
+  "company": "Empresa Exemplo",
+  "date": "2026-12-02",
+  "event": "Conferência (1x1 com CFO)",
+  "participants": "CFO, Head de IR",
+  "format": "1x1, 30 min",
+  "notes_url": "https://notes.granola.ai/d/<id-da-reuniao>",
+  "baseline_sentiment": 1.2,
+  "baseline_date": "2026-11-30",
+  "bear_trigger_hit": false,
+  "pillars": [
+    {"id": "P1", "name": "Demanda sustenta >30% de crescimento em 2027", "weight": 0.35, "score": 1,
+     "evidence": "\"Lead times are still north of 40 weeks\" — sem número novo de backlog"},
+    {"id": "P2", "name": "Margem bruta estável com a rampa do produto novo", "weight": 0.25, "score": -1,
+     "evidence": "Admitiu diluição de 'a couple hundred bps' nos dois primeiros trimestres da rampa"},
+    {"id": "P3", "name": "Ganho de share vs. concorrente", "weight": 0.20, "score": null, "evidence": ""},
+    {"id": "P4", "name": "Recompra acelera em 2027", "weight": 0.20, "score": 1,
+     "evidence": "\"We will be more aggressive on buybacks next year\""}
+  ],
+  "dimensions": [
+    {"name": "Fundamentos vs. consenso", "weight": 0.40, "score": 1,
+     "evidence": "Demanda acima do consenso; margem um pouco abaixo"},
+    {"name": "Guidance / KPIs", "weight": 0.25, "score": 0,
+     "evidence": "Reafirmou o guidance sem mudança"},
+    {"name": "Mudança de tom vs. última interação", "weight": 0.20, "score": -1,
+     "evidence": "Mais vago sobre margem do que no último call de resultado"},
+    {"name": "Credibilidade / consistência", "weight": 0.15, "score": 0,
+     "evidence": "Números consistentes com o último resultado"}
+  ],
+  "incremental_info": 1,
+  "conviction": "=",
+  "conviction_note": "Demanda segue forte; margem da rampa é o ponto a monitorar",
+  "highlights": [
+    {"tag": "Consenso", "text": "Lead times acima de 40 semanas; demanda segue acima da oferta"},
+    {"tag": "Diferenciado", "text": "Diluição de ~200 bps na margem bruta durante a rampa: consenso modela margem estável"},
+    {"tag": "Consenso", "text": "Recompra mais agressiva em 2027"}
+  ],
+  "red_flags": ["Evitou dar prazo para a recuperação da margem bruta"],
+  "follow_ups": ["Modelo: testar margem bruta 2T27 com -200 bps", "IR vai mandar a curva de capacidade 2027"]
+}
